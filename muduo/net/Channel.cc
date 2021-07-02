@@ -55,7 +55,7 @@ void Channel::update()
   addedToLoop_ = true;
   loop_->updateChannel(this);
 }
-
+/// 删除某个channel
 void Channel::remove()
 {
   assert(isNoneEvent());

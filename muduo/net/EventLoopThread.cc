@@ -17,6 +17,7 @@ EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
                                  const string& name)
   : loop_(NULL),
     exiting_(false),
+    // 自动绑定threadFunc
     thread_(std::bind(&EventLoopThread::threadFunc, this), name),
     mutex_(),
     cond_(mutex_),
@@ -36,14 +37,17 @@ EventLoopThread::~EventLoopThread()
   }
 }
 
+
 EventLoop* EventLoopThread::startLoop()
 {
   assert(!thread_.started());
+  // 执行线程
   thread_.start();
 
   EventLoop* loop = NULL;
   {
     MutexLockGuard lock(mutex_);
+    // 等待ThreadFunc的填入
     while (loop_ == NULL)
     {
       cond_.wait();
@@ -54,8 +58,10 @@ EventLoop* EventLoopThread::startLoop()
   return loop;
 }
 
+// 设置需要执行的threadFunc()
 void EventLoopThread::threadFunc()
 {
+   /// 在栈上运行的eventloop
   EventLoop loop;
 
   if (callback_)
@@ -68,7 +74,7 @@ void EventLoopThread::threadFunc()
     loop_ = &loop;
     cond_.notify();
   }
-
+  // 自动监听fd
   loop.loop();
   //assert(exiting_);
   MutexLockGuard lock(mutex_);

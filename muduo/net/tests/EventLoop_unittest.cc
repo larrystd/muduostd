@@ -13,6 +13,7 @@ EventLoop* g_loop;
 void callback()
 {
   printf("callback(): pid = %d, tid = %d\n", getpid(), CurrentThread::tid());
+  // 报错，因为已经在threadFunc()中执行了callback，而one loop one thread
   EventLoop anotherLoop;
 }
 
@@ -36,6 +37,8 @@ int main()
   assert(EventLoop::getEventLoopOfCurrentThread() == &loop);
 
   Thread thread(threadFunc);
+
+  /// 启动thread执行void threadFunc()， 
   thread.start();
 
   loop.loop();

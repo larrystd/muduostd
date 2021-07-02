@@ -131,6 +131,9 @@ void TcpConnection::send(Buffer* buf)
   }
 }
 
+/// 对IO和buffer的读写，都应该在IO线程中完成。
+/// 这可以防止多线程的竞态
+/// runInLoop函数，将该写任务抛给了io线程处理。
 void TcpConnection::sendInLoop(const StringPiece& message)
 {
   sendInLoop(message.data(), message.size());
@@ -320,12 +323,15 @@ void TcpConnection::stopReadInLoop()
   }
 }
 
+// 连接建立
 void TcpConnection::connectEstablished()
 {
   loop_->assertInLoopThread();
   assert(state_ == kConnecting);
   setState(kConnected);
+  // share_ptr维护的this指针，也就是channel->tie(TcpConnection)
   channel_->tie(shared_from_this());
+  /// 注册监听的fd
   channel_->enableReading();
 
   connectionCallback_(shared_from_this());
@@ -344,6 +350,8 @@ void TcpConnection::connectDestroyed()
   channel_->remove();
 }
 
+
+/// 实际调用messageCallback_回调函数
 void TcpConnection::handleRead(Timestamp receiveTime)
 {
   loop_->assertInLoopThread();
