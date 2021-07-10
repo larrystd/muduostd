@@ -45,11 +45,13 @@ TcpConnection::TcpConnection(EventLoop* loop,
     state_(kConnecting),
     reading_(true),
     socket_(new Socket(sockfd)),
+    /// 构造channel_对象
     channel_(new Channel(loop, sockfd)),
     localAddr_(localAddr),
     peerAddr_(peerAddr),
     highWaterMark_(64*1024*1024)
 {
+  /// 设置回调函数
   channel_->setReadCallback(
       std::bind(&TcpConnection::handleRead, this, _1));
   channel_->setWriteCallback(
@@ -323,7 +325,7 @@ void TcpConnection::stopReadInLoop()
   }
 }
 
-// 连接建立
+// 连接建立函数，在IO线程中执行
 void TcpConnection::connectEstablished()
 {
   loop_->assertInLoopThread();
@@ -331,7 +333,7 @@ void TcpConnection::connectEstablished()
   setState(kConnected);
   // share_ptr维护的this指针，也就是channel->tie(TcpConnection)
   channel_->tie(shared_from_this());
-  /// 注册监听的fd
+  /// 设置TcpConnection的channel对象可读，向poller注册监听的fd
   channel_->enableReading();
 
   connectionCallback_(shared_from_this());

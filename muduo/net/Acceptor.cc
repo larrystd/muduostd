@@ -33,6 +33,7 @@ Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
   acceptSocket_.setReuseAddr(true);
   acceptSocket_.setReusePort(reuseport);
   acceptSocket_.bindAddress(listenAddr);
+  // 该通道可读的回调函数,loop中调用
   acceptChannel_.setReadCallback(
       std::bind(&Acceptor::handleRead, this));
 }
@@ -49,7 +50,8 @@ void Acceptor::listen()
   loop_->assertInLoopThread();
   listening_ = true;
   acceptSocket_.listen();
-  acceptChannel_.enableReading(); //更新文件描述符
+  // 该通道可读
+  acceptChannel_.enableReading(); 
 }
 
 void Acceptor::handleRead()

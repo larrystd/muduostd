@@ -32,7 +32,7 @@ TcpServer::TcpServer(EventLoop* loop,
     messageCallback_(defaultMessageCallback),
     nextConnId_(1)
 {
-  /// 新建连接
+  /// 新建连接的回调函数
   acceptor_->setNewConnectionCallback(
       std::bind(&TcpServer::newConnection, this, _1, _2));
 }
@@ -71,6 +71,7 @@ void TcpServer::start()
   }
 }
 
+/// 一旦新连接到达，调用之
 void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
 {
   loop_->assertInLoopThread();
@@ -86,7 +87,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
   InetAddress localAddr(sockets::getLocalAddr(sockfd));
   // FIXME poll with zero timeout to double confirm the new connection
   // FIXME use make_shared if necessary
-  // 新建连接
+  // 封装新连接到TcpConnection对象，用std::shared_ptr<TcpConnection>维护，储存到map中 connections_[connName] = conn
   TcpConnectionPtr conn(new TcpConnection(ioLoop,
                                           connName,
                                           sockfd,

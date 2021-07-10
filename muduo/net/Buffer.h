@@ -23,7 +23,7 @@
 #include <assert.h>
 #include <string.h>
 //#include <unistd.h>  // ssize_t
-
+/// 缓冲buffer的设计
 namespace muduo
 {
 namespace net
