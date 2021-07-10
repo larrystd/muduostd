@@ -22,6 +22,9 @@ using namespace muduo::net;
 
 // On Linux, the constants of poll(2) and epoll(4)
 // are expected to be the same.
+//  int epoll_create(int size)
+// int epoll_ctl(int epfd， int op， int fd， struct epoll_event *event)
+//  int epoll_wait(int epfd， struct epoll_event *events， int maxevents， int timeout)
 static_assert(EPOLLIN == POLLIN,        "epoll uses same flag values as poll");
 static_assert(EPOLLPRI == POLLPRI,      "epoll uses same flag values as poll");
 static_assert(EPOLLOUT == POLLOUT,      "epoll uses same flag values as poll");
@@ -104,6 +107,7 @@ void EPollPoller::fillActiveChannels(int numEvents,
   }
 }
 
+/// 更新某个channel
 void EPollPoller::updateChannel(Channel* channel)
 {
   Poller::assertInLoopThread();
@@ -151,6 +155,7 @@ void EPollPoller::updateChannel(Channel* channel)
 void EPollPoller::removeChannel(Channel* channel)
 {
   Poller::assertInLoopThread();
+  // channel的fd
   int fd = channel->fd();
   LOG_TRACE << "fd = " << fd;
   assert(channels_.find(fd) != channels_.end());
@@ -158,6 +163,7 @@ void EPollPoller::removeChannel(Channel* channel)
   assert(channel->isNoneEvent());
   int index = channel->index();
   assert(index == kAdded || index == kDeleted);
+
   size_t n = channels_.erase(fd);
   (void)n;
   assert(n == 1);
@@ -169,6 +175,7 @@ void EPollPoller::removeChannel(Channel* channel)
   channel->set_index(kNew);
 }
 
+/// 更新poll的fd
 void EPollPoller::update(int operation, Channel* channel)
 {
   struct epoll_event event;

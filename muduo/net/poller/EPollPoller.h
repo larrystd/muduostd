@@ -42,6 +42,7 @@ class EPollPoller : public Poller
 
   void fillActiveChannels(int numEvents,
                           ChannelList* activeChannels) const;
+  // update channel
   void update(int operation, Channel* channel);
 
   typedef std::vector<struct epoll_event> EventList;

@@ -42,6 +42,7 @@ class EventLoopThread : noncopyable
 
   EventLoop* loop_ GUARDED_BY(mutex_);
   bool exiting_;
+  // thread
   Thread thread_;
   MutexLock mutex_;
   Condition cond_ GUARDED_BY(mutex_);

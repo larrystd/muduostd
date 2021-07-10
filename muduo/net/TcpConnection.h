@@ -29,8 +29,14 @@ namespace muduo
 {
 namespace net
 {
+/// 协调三个class, Channel, EventLoop, Socket
+/// connection的读写需要调用socket
+/// 该TcpConnection来自哪个EventLoop?
+/// Tcp链接的建立断开来自channel， 把Channel的裸指针暴露给EventLoop（确切的讲是暴露给Poller），因为Poller需要对Channel的事件进行管理（添加、修改、删除）。
+/// 读写会写到buffer中，因此相当与操作buffer
 
 class Channel;
+
 class EventLoop;
 class Socket;
 

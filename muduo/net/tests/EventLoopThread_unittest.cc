@@ -8,6 +8,10 @@
 
 using namespace muduo;
 using namespace muduo::net;
+// pid 进程id， tid线程id
+//线程是轻量级的进程，轻量级体现在所有的进程切换都需要清除所有的表、进程间的共享信息也比较麻烦，一般来说通过管道或者共享内存，
+// 如果是 fork 函数后的父子进程则使用共享文件，然而线程切换不需要像进程一样具有昂贵的开销，而且线程通信起来也更方便。
+// 线程分为两种：用户级线程和内核级线程
 
 void print(EventLoop* p = NULL)
 {
@@ -26,7 +30,7 @@ int main()
   print();
 
   {
-  EventLoopThread thr1;  // never start
+  EventLoopThread thr1;  // never start, no loop
   }
 
   {

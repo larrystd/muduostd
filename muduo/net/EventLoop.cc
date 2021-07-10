@@ -77,6 +77,7 @@ EventLoop::EventLoop()
 {
   LOG_DEBUG << "EventLoop created " << this << " in thread " << threadId_;
   /// 同一个thread实现eventloop
+
   if (t_loopInThisThread)
   {
     LOG_FATAL << "Another EventLoop " << t_loopInThisThread
@@ -112,7 +113,9 @@ void EventLoop::loop()
 
   while (!quit_)
   {
-    // 利用poller_->poll返回activeChannels_
+
+    /// 使用poller_->poll来获取activeChannels_，调用注册到activeChannels_的回调函数handleEvent。
+    /// 一般的，先调用thread.start()开启服务，建立连接;再调用loop.loop进行通信
     activeChannels_.clear();
     pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_); 
     ++iteration_;
@@ -130,6 +133,9 @@ void EventLoop::loop()
     }
     currentActiveChannel_ = NULL;
     eventHandling_ = false;
+    /// 执行需要在io线程中执行的函数(防止多线程竞态)
+    /// 注意如果此时该EventLoop中迟迟没有事件触发，那么epoll_wait一直就会阻塞。 这样会导致，pendingFunctors_迟迟不能被执行了。
+    /// 因此可能需要唤醒epoll_wait，随机触发一个事件即可
     doPendingFunctors();
   }
 
@@ -151,6 +157,7 @@ void EventLoop::quit()
 
 void EventLoop::runInLoop(Functor cb)
 {
+  /// 必须在eventloop的io线程执行cb函数
   if (isInLoopThread())
   {
     cb();
@@ -170,6 +177,7 @@ void EventLoop::queueInLoop(Functor cb)
 
   if (!isInLoopThread() || callingPendingFunctors_)
   {
+    /// 唤醒eventloop的epoll_wait等待事件触发
     wakeup();
   }
 }
@@ -179,7 +187,7 @@ size_t EventLoop::queueSize() const
   MutexLockGuard lock(mutex_);
   return pendingFunctors_.size();
 }
-
+/// 定时器
 TimerId EventLoop::runAt(Timestamp time, TimerCallback cb)
 {
   return timerQueue_->addTimer(std::move(cb), time, 0.0);
@@ -201,7 +209,7 @@ void EventLoop::cancel(TimerId timerId)
 {
   return timerQueue_->cancel(timerId);
 }
-
+/// 更新channel,其实是更新内部的fd
 void EventLoop::updateChannel(Channel* channel)
 {
   assert(channel->ownerLoop() == this);
@@ -235,6 +243,7 @@ void EventLoop::abortNotInLoopThread()
             << ", current thread id = " <<  CurrentThread::tid();
 }
 
+/// 对这个eventfd进行写操作，以触发该eventfd的可读事件。这样就起到了唤醒EventLoop的作用。
 void EventLoop::wakeup()
 {
   uint64_t one = 1;

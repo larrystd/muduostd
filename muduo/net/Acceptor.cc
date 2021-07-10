@@ -57,7 +57,7 @@ void Acceptor::handleRead()
   loop_->assertInLoopThread();
   InetAddress peerAddr;
   //FIXME loop until no more
-  int connfd = acceptSocket_.accept(&peerAddr);
+  int connfd = acceptSocket_.accept(&peerAddr); // accept socket
   if (connfd >= 0)
   {
     // string hostport = peerAddr.toIpPort();

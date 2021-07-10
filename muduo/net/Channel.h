@@ -30,6 +30,11 @@ class EventLoop;
 /// This class doesn't own the file descriptor.
 /// The file descriptor could be a socket,
 /// an eventfd, a timerfd, or a signalfd
+/// loop通过poll获取活跃的channel，channel主要是调用handlEvent来进行对应的ReadCallback， WriteCallback, CloseCallback, ErrorCallback处理
+/// 具体的处理函数需要外界提供之
+/// Channel调用loop_->updateChannel(this)等来注册事件的操作
+/// 监听文件描述符是否可读，可写等
+
 class Channel : noncopyable
 {
  public:
@@ -61,7 +66,7 @@ class Channel : noncopyable
   void set_revents(int revt) { revents_ = revt; } // used by pollers
   // int revents() const { return revents_; }
   bool isNoneEvent() const { return events_ == kNoneEvent; }
-
+  // 该通道的event是否可读，可写等
   void enableReading() { events_ |= kReadEvent; update(); }
   void disableReading() { events_ &= ~kReadEvent; update(); }
   void enableWriting() { events_ |= kWriteEvent; update(); }
