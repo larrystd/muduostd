@@ -113,7 +113,7 @@ inline double timeDifference(Timestamp high, Timestamp low)
   return static_cast<double>(diff) / Timestamp::kMicroSecondsPerSecond;
 }
 
-///
+///时间戳
 /// Add @c seconds to given timestamp.
 ///
 /// @return timestamp+seconds as Timestamp

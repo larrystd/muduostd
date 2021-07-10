@@ -34,6 +34,12 @@ class TimerQueue;
 
 ///
 /// Reactor, at most one per thread.
+/// one thread on loop一个网络IO线程一个循环，循环里面做着一样的事情
+/// 主线程属于main loop，创建listenfd，创建listenfd的可读回调函数，该回调函数执行accept返回交流套接字，同时new一个http对象（与交流套接字绑定），
+/// 添加进thread loop，从此这个交流套接字由thread loop负责，进行响应。
+/// 事实上每个loop是在获取activeChannels_
+
+
 ///
 /// This is an interface class, so don't expose too much details.
 class EventLoop : noncopyable
@@ -100,6 +106,7 @@ class EventLoop : noncopyable
   void cancel(TimerId timerId);
 
   // internal usage
+  /// 更新channel，就是更新需要poll的连接，因此调用poller内部函数实现
   void wakeup();
   void updateChannel(Channel* channel);
   void removeChannel(Channel* channel);
@@ -113,7 +120,7 @@ class EventLoop : noncopyable
       abortNotInLoopThread();
     }
   }
-  bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); }
+  bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); } // 是否为线程
   // bool callingPendingFunctors() const { return callingPendingFunctors_; }
   bool eventHandling() const { return eventHandling_; }
 
@@ -129,20 +136,26 @@ class EventLoop : noncopyable
   static EventLoop* getEventLoopOfCurrentThread();
 
  private:
+  // EventLoop对象创建者并非本线程
   void abortNotInLoopThread();
+  // read waked up fd_
   void handleRead();  // waked up
+  // ??
   void doPendingFunctors();
-
+  // 打印ChannelList activeChannels_;
   void printActiveChannels() const; // DEBUG
 
   typedef std::vector<Channel*> ChannelList;
-
+  // 调用EventLoop，设置为true
   bool looping_; /* atomic */
   std::atomic<bool> quit_;
+  // 处理事件中
   bool eventHandling_; /* atomic */
   bool callingPendingFunctors_; /* atomic */
+  // 迭代次数
   int64_t iteration_;
   const pid_t threadId_;
+  // pollReturnTime_ 时间戳
   Timestamp pollReturnTime_;
   std::unique_ptr<Poller> poller_;
   std::unique_ptr<TimerQueue> timerQueue_;

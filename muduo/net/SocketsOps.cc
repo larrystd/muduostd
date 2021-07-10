@@ -73,7 +73,8 @@ const struct sockaddr_in6* sockets::sockaddr_in6_cast(const struct sockaddr* add
 {
   return static_cast<const struct sockaddr_in6*>(implicit_cast<const void*>(addr));
 }
-
+/// 核心函数, create, bind, listen, connect, readv, 
+// 创建socket，返回文件描述符
 int sockets::createNonblockingOrDie(sa_family_t family)
 {
 #if VALGRIND

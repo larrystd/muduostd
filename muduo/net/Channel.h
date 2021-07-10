@@ -24,7 +24,7 @@ namespace net
 
 class EventLoop;
 
-///
+/// channel 网络连接的抽象
 /// A selectable I/O channel.
 ///
 /// This class doesn't own the file descriptor.
@@ -33,13 +33,15 @@ class EventLoop;
 class Channel : noncopyable
 {
  public:
+  // event回调函数，read回调
   typedef std::function<void()> EventCallback;
   typedef std::function<void(Timestamp)> ReadEventCallback;
-
+  // 构造，传入EventLoop和fd
   Channel(EventLoop* loop, int fd);
   ~Channel();
-
+  // 处理事件函数
   void handleEvent(Timestamp receiveTime);
+  // 设置回调函数，分别是写回调，读回调，关闭回调，错误回调
   void setReadCallback(ReadEventCallback cb)
   { readCallback_ = std::move(cb); }
   void setWriteCallback(EventCallback cb)
@@ -51,6 +53,7 @@ class Channel : noncopyable
 
   /// Tie this channel to the owner object managed by shared_ptr,
   /// prevent the owner object being destroyed in handleEvent.
+  /// 绑定const std::shared_ptr<void>& obj
   void tie(const std::shared_ptr<void>&);
 
   int fd() const { return fd_; }
@@ -82,7 +85,7 @@ class Channel : noncopyable
 
  private:
   static string eventsToString(int fd, int ev);
-
+  /// 更新channel
   void update();
   void handleEventWithGuard(Timestamp receiveTime);
 
@@ -97,10 +100,12 @@ class Channel : noncopyable
   int        index_; // used by Poller.
   bool       logHup_;
 
+  // 
   std::weak_ptr<void> tie_;
   bool tied_;
   bool eventHandling_;
   bool addedToLoop_;
+  // 回调函数
   ReadEventCallback readCallback_;
   EventCallback writeCallback_;
   EventCallback closeCallback_;

@@ -174,13 +174,14 @@ void Thread::setDefaultName()
   }
 }
 
+// 创建线程并执行
 void Thread::start()
 {
   assert(!started_);
   started_ = true;
   // FIXME: move(func_)
   detail::ThreadData* data = new detail::ThreadData(func_, name_, &tid_, &latch_);
-  if (pthread_create(&pthreadId_, NULL, &detail::startThread, data))
+  if (pthread_create(&pthreadId_, NULL, &detail::startThread, data)) // 创建失败，返回1
   {
     started_ = false;
     delete data; // or no delete?
@@ -194,6 +195,7 @@ void Thread::start()
   }
 }
 
+// pthread_join
 int Thread::join()
 {
   assert(started_);

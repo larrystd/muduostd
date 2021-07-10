@@ -18,6 +18,7 @@
 #include <memory>
 #include <vector>
 
+// EventLoopThreadPool，处理若干EventLoop。包含若干EventLoopThreads
 namespace muduo
 {
 

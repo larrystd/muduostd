@@ -21,6 +21,7 @@ void test(int maxSize)
 {
   LOG_WARN << "Test ThreadPool with max queue size = " << maxSize;
   muduo::ThreadPool pool("MainThreadPool");
+  // 设置线程池大小
   pool.setMaxQueueSize(maxSize);
   pool.start(5);
 
@@ -31,6 +32,7 @@ void test(int maxSize)
   {
     char buf[32];
     snprintf(buf, sizeof buf, "task %d", i);
+    // 执行任务
     pool.run(std::bind(printString, std::string(buf)));
   }
   LOG_WARN << "Done";

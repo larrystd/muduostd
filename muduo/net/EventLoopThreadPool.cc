@@ -36,11 +36,12 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
   baseLoop_->assertInLoopThread();
 
   started_ = true;
-
+  // 创建threads和loops
   for (int i = 0; i < numThreads_; ++i)
   {
     char buf[name_.size() + 32];
     snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
+    // 构造EventLoopThread
     EventLoopThread* t = new EventLoopThread(cb, buf);
     threads_.push_back(std::unique_ptr<EventLoopThread>(t));
     loops_.push_back(t->startLoop());

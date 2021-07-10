@@ -126,4 +126,102 @@ pthread_setspecific
   }
 ```
 
-### 封装一个thread_pool线程
+### 封装一个thread_pool线程池
+首先线程池需要封装一个vector的线程，Task组成的队列
+Task就是std::function<void()>
+
+run(Task task)函数设置执行task，但倘若有其他任务正在执行，当前task入队列
+
+start函数线程池执行，实际上是对线程vector依次执行。执行函数为runInThread，也就是muduo::Thread(std::bind(&ThreadPool::runInThread, this)
+
+执行task的函数为ThreadPool::runInThread(),在执行前调用task()从队列中拿出任务，也就是一个thread执行队列中的一个任务，如果没有任务需要等待（当前线程也就不会执行直到任务push)。
+
+running 变量控制线程的执行，stop()会设置running=false,从而停止执行
+
+在执行时只需要不断调用run(Task task)来执行新的task，注意线程池内的线程执行完后会退出，也就是size大小的线程池最多执行size个任务。
+```cpp
+
+class ThreadPool : noncopyable
+{
+  typedef std::function<void ()> Task;
+
+  explicit ThreadPool(const string& nameArg = string("ThreadPool"));
+  ~ThreadPool();
+
+  std::vector<std::unique_ptr<muduo::Thread>> threads_;
+  std::deque<Task> queue_ GUARDED_BY(mutex_);
+
+
+void ThreadPool::start(int numThreads)
+{
+  assert(threads_.empty());
+  running_ = true;
+  // 分配空间
+  threads_.reserve(numThreads);
+  for (int i = 0; i < numThreads; ++i)
+  {
+    threads_.emplace_back(new muduo::Thread(
+          std::bind(&ThreadPool::runInThread, this), name_+id));
+    threads_[i]->start();
+  }
+}
+
+void ThreadPool::run(Task task)
+{
+  if (threads_.empty())
+  {
+    task();
+  }
+  // 入队列
+  else
+  {
+    MutexLockGuard lock(mutex_);
+    while (isFull() && running_)
+    {
+      notFull_.wait();
+    }
+    if (!running_) return;
+    assert(!isFull());
+
+    queue_.push_back(std::move(task));
+    notEmpty_.notify();
+  }
+}
+
+void ThreadPool::runInThread()
+{
+  try
+  {
+    while (running_)
+    {
+      Task task(take());
+      if (task)
+      {
+        task();
+      }
+    }
+  }
+
+ThreadPool::Task ThreadPool::take()
+{
+  MutexLockGuard lock(mutex_);
+  // always use a while-loop, due to spurious wakeup
+  while (queue_.empty() && running_)
+  {
+    notEmpty_.wait();
+  }
+  Task task;
+  if (!queue_.empty())
+  {
+    task = queue_.front();
+    queue_.pop_front();
+    if (maxQueueSize_ > 0)
+    {
+      notFull_.notify();
+    }
+  }
+  return task;
+}
+```
+
+

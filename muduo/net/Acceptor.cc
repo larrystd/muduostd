@@ -49,7 +49,7 @@ void Acceptor::listen()
   loop_->assertInLoopThread();
   listening_ = true;
   acceptSocket_.listen();
-  acceptChannel_.enableReading();
+  acceptChannel_.enableReading(); //更新文件描述符
 }
 
 void Acceptor::handleRead()

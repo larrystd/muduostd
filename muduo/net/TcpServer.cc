@@ -63,6 +63,7 @@ void TcpServer::start()
     threadPool_->start(threadInitCallback_);
 
     assert(!acceptor_->listening());
+    // 执行runInLoop
     loop_->runInLoop(
         std::bind(&Acceptor::listen, get_pointer(acceptor_)));
   }

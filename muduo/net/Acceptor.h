@@ -30,6 +30,7 @@ class InetAddress;
 class Acceptor : noncopyable
 {
  public:
+ /// NewConnectionCallback 传入的参数为sockfd和InetAddress
   typedef std::function<void (int sockfd, const InetAddress&)> NewConnectionCallback;
 
   Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);

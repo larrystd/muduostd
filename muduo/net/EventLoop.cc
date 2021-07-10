@@ -6,6 +6,7 @@
 
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
+
 #include "muduo/net/EventLoop.h"
 
 #include "muduo/base/Logging.h"
@@ -75,6 +76,7 @@ EventLoop::EventLoop()
     currentActiveChannel_(NULL)
 {
   LOG_DEBUG << "EventLoop created " << this << " in thread " << threadId_;
+  /// 同一个thread实现eventloop
   if (t_loopInThisThread)
   {
     LOG_FATAL << "Another EventLoop " << t_loopInThisThread
@@ -99,7 +101,7 @@ EventLoop::~EventLoop()
   ::close(wakeupFd_);
   t_loopInThisThread = NULL;
 }
-
+// EventLoop的loop实际上是基于poll,epoll返回注册事件
 void EventLoop::loop()
 {
   assert(!looping_);
@@ -110,19 +112,21 @@ void EventLoop::loop()
 
   while (!quit_)
   {
+    // 利用poller_->poll返回activeChannels_
     activeChannels_.clear();
-    pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);
+    pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_); 
     ++iteration_;
     if (Logger::logLevel() <= Logger::TRACE)
     {
       printActiveChannels();
     }
     // TODO sort channel by priority
+    // 获取到activeChannels_，接下来处理每个通道的事件
     eventHandling_ = true;
     for (Channel* channel : activeChannels_)
     {
       currentActiveChannel_ = channel;
-      currentActiveChannel_->handleEvent(pollReturnTime_);
+      currentActiveChannel_->handleEvent(pollReturnTime_);  // 处理事件
     }
     currentActiveChannel_ = NULL;
     eventHandling_ = false;

@@ -33,11 +33,13 @@ class Poller : noncopyable
  public:
   typedef std::vector<Channel*> ChannelList;
 
+  // 传入EventLoop
   Poller(EventLoop* loop);
   virtual ~Poller();
 
   /// Polls the I/O events.
   /// Must be called in the loop thread.
+  /// poll函数是一个虚函数，需要用户根据特点进行重写
   virtual Timestamp poll(int timeoutMs, ChannelList* activeChannels) = 0;
 
   /// Changes the interested I/O events.

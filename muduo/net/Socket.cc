@@ -24,6 +24,7 @@ Socket::~Socket()
   sockets::close(sockfd_);
 }
 
+// ::getsocketopt
 bool Socket::getTcpInfo(struct tcp_info* tcpi) const
 {
   socklen_t len = sizeof(*tcpi);
@@ -31,6 +32,7 @@ bool Socket::getTcpInfo(struct tcp_info* tcpi) const
   return ::getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
 }
 
+// ::getsocketopt string format
 bool Socket::getTcpInfoString(char* buf, int len) const
 {
   struct tcp_info tcpi;

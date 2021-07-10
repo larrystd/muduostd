@@ -34,6 +34,7 @@ void ThreadPool::start(int numThreads)
 {
   assert(threads_.empty());
   running_ = true;
+  // 分配空间
   threads_.reserve(numThreads);
   for (int i = 0; i < numThreads; ++i)
   {
@@ -125,6 +126,7 @@ void ThreadPool::runInThread()
     {
       threadInitCallback_();
     }
+    // 控制线程的执行
     while (running_)
     {
       Task task(take());

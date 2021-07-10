@@ -24,6 +24,7 @@ namespace net
 
 class Channel;
 class EventLoop;
+/// NewConnectionCallback: 执行连接后的回调函数
 
 class Connector : noncopyable,
                   public std::enable_shared_from_this<Connector>

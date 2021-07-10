@@ -80,6 +80,7 @@ void Channel::handleEvent(Timestamp receiveTime)
   }
 }
 
+// 根据revents_和poll的options来执行各种回调函数
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
   eventHandling_ = true;

@@ -39,6 +39,7 @@ EventLoopThread::~EventLoopThread()
 EventLoop* EventLoopThread::startLoop()
 {
   assert(!thread_.started());
+  // 线程执行start()
   thread_.start();
 
   EventLoop* loop = NULL;
@@ -60,6 +61,7 @@ void EventLoopThread::threadFunc()
 
   if (callback_)
   {
+    // 回调函数执行
     callback_(&loop);
   }
 
