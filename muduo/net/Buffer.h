@@ -42,9 +42,11 @@ namespace net
 class Buffer : public muduo::copyable
 {
  public:
+ // kCheapPrepend不为0, 可以方便可能存在的前面插入数据
   static const size_t kCheapPrepend = 8;
   static const size_t kInitialSize = 1024;
 
+  // 显示初始化
   explicit Buffer(size_t initialSize = kInitialSize)
     : buffer_(kCheapPrepend + initialSize),
       readerIndex_(kCheapPrepend),
@@ -55,31 +57,29 @@ class Buffer : public muduo::copyable
     assert(prependableBytes() == kCheapPrepend);
   }
 
-  // implicit copy-ctor, move-ctor, dtor and assignment are fine
-  // NOTE: implicit move-ctor is added in g++ 4.6
-
+  // swap Buffer rhs
   void swap(Buffer& rhs)
   {
     buffer_.swap(rhs.buffer_);
     std::swap(readerIndex_, rhs.readerIndex_);
     std::swap(writerIndex_, rhs.writerIndex_);
   }
-
+  // 可读的字节数
   size_t readableBytes() const
   { return writerIndex_ - readerIndex_; }
-
+  // 可写的字节数
   size_t writableBytes() const
   { return buffer_.size() - writerIndex_; }
-
+  // 前空间字节数
   size_t prependableBytes() const
   { return readerIndex_; }
-
+  // peek() 可读pos地址
   const char* peek() const
   { return begin() + readerIndex_; }
-
+  // 找CR LR \r或\n
+  // 在可读区域寻找
   const char* findCRLF() const
   {
-    // FIXME: replace with memmem()?
     const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF+2);
     return crlf == beginWrite() ? NULL : crlf;
   }
@@ -88,17 +88,17 @@ class Buffer : public muduo::copyable
   {
     assert(peek() <= start);
     assert(start <= beginWrite());
-    // FIXME: replace with memmem()?
     const char* crlf = std::search(start, beginWrite(), kCRLF, kCRLF+2);
     return crlf == beginWrite() ? NULL : crlf;
   }
-
+  // 寻找
   const char* findEOL() const
   {
     const void* eol = memchr(peek(), '\n', readableBytes());
     return static_cast<const char*>(eol);
   }
-
+  // memchr 返回一个指向匹配字节的指针
+  // 寻找\n
   const char* findEOL(const char* start) const
   {
     assert(peek() <= start);
@@ -107,16 +107,19 @@ class Buffer : public muduo::copyable
     return static_cast<const char*>(eol);
   }
 
-  // retrieve returns void, to prevent
-  // string str(retrieve(readableBytes()), readableBytes());
-  // the evaluation of two functions are unspecified
+  // retrieve 读后数据更新索引
+  // 调用retrieveAll， 用kCheapPrepend重新设置readerIndex_和writerIndex_
+  // 读后若len < readableBytes(), 后移动readerIndex_
+  //  若len = readableBytes， 说明缓冲区数据全部读完，重置索引为初值
   void retrieve(size_t len)
   {
     assert(len <= readableBytes());
+    // readerIndex_前移len，
     if (len < readableBytes())
     {
       readerIndex_ += len;
     }
+    // 重置readerIndex_
     else
     {
       retrieveAll();
@@ -168,44 +171,46 @@ class Buffer : public muduo::copyable
     retrieve(len);
     return result;
   }
-
+  // 将可读区域封装成StringPiece返回
   StringPiece toStringPiece() const
   {
     return StringPiece(peek(), static_cast<int>(readableBytes()));
   }
-
+  // 写数据，将data append()可写区域之后
   void append(const StringPiece& str)
   {
     append(str.data(), str.size());
   }
 
-  void append(const char* /*restrict*/ data, size_t len)
+  void append(const char* data, size_t len)
   {
+    // 这行保证是可写的，有可写空间对于len来说
     ensureWritableBytes(len);
     std::copy(data, data+len, beginWrite());
     hasWritten(len);
   }
 
-  void append(const void* /*restrict*/ data, size_t len)
+  void append(const void* data, size_t len)
   {
     append(static_cast<const char*>(data), len);
   }
-
+  // 确保有可写空间，没有的话开辟之
   void ensureWritableBytes(size_t len)
   {
+    // 空间不够，开辟空间
     if (writableBytes() < len)
     {
       makeSpace(len);
     }
     assert(writableBytes() >= len);
   }
-
+  // 开始可写的索引
   char* beginWrite()
   { return begin() + writerIndex_; }
 
   const char* beginWrite() const
   { return begin() + writerIndex_; }
-
+  // 更新可写的索引
   void hasWritten(size_t len)
   {
     assert(len <= writableBytes());
@@ -247,7 +252,7 @@ class Buffer : public muduo::copyable
     append(&x, sizeof x);
   }
 
-  ///
+  /// 读数据，读取一个整数
   /// Read int64_t from network endian
   ///
   /// Require: buf->readableBytes() >= sizeof(int32_t)
@@ -287,6 +292,7 @@ class Buffer : public muduo::copyable
   /// Peek int64_t from network endian
   ///
   /// Require: buf->readableBytes() >= sizeof(int64_t)
+  /// 读数据
   int64_t peekInt64() const
   {
     assert(readableBytes() >= sizeof(int64_t));
@@ -350,8 +356,8 @@ class Buffer : public muduo::copyable
   {
     prepend(&x, sizeof x);
   }
-
-  void prepend(const void* /*restrict*/ data, size_t len)
+  // 在readerIndex_前面，也就是prependable区域插入数据
+  void prepend(const void* data, size_t len)
   {
     assert(len <= prependableBytes());
     readerIndex_ -= len;
@@ -359,15 +365,15 @@ class Buffer : public muduo::copyable
     std::copy(d, d+len, begin()+readerIndex_);
   }
 
+  // 新开辟区域
   void shrink(size_t reserve)
   {
-    // FIXME: use vector::shrink_to_fit() in C++ 11 if possible.
     Buffer other;
     other.ensureWritableBytes(readableBytes()+reserve);
     other.append(toStringPiece());
     swap(other);
   }
-
+  // 缓冲区全部容量
   size_t internalCapacity() const
   {
     return buffer_.capacity();
@@ -380,25 +386,31 @@ class Buffer : public muduo::copyable
   ssize_t readFd(int fd, int* savedErrno);
 
  private:
-
+  // 缓冲区起始地址
   char* begin()
   { return &*buffer_.begin(); }
 
   const char* begin() const
   { return &*buffer_.begin(); }
 
+  // 如可写空间不足，则开辟之，其实调用vector的resize函数
   void makeSpace(size_t len)
   {
+    // 这种情况必须要重新开辟空间
     if (writableBytes() + prependableBytes() < len + kCheapPrepend)
     {
       // FIXME: move readable data
+      // 另开辟足够大的可写空间
       buffer_.resize(writerIndex_+len);
     }
     else
+    // 由于prependableBytes空间较大可以容纳写区域，这时候移动数据即可
     {
       // move readable data to the front, make space inside buffer
       assert(kCheapPrepend < readerIndex_);
       size_t readable = readableBytes();
+      // std::copy(start, end, container.begin());
+      // 将当前的readerIndex_移动到初始化的kCheapPrepend，从而给后面空下空间
       std::copy(begin()+readerIndex_,
                 begin()+writerIndex_,
                 begin()+kCheapPrepend);
@@ -409,6 +421,7 @@ class Buffer : public muduo::copyable
   }
 
  private:
+ // 缓冲区用vector作为底层容器
   std::vector<char> buffer_;
   size_t readerIndex_;
   size_t writerIndex_;

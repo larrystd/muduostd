@@ -30,7 +30,7 @@ class EPollPoller : public Poller
  public:
   EPollPoller(EventLoop* loop);
   ~EPollPoller() override;
-
+  /// 重写方法
   Timestamp poll(int timeoutMs, ChannelList* activeChannels) override;
   void updateChannel(Channel* channel) override;
   void removeChannel(Channel* channel) override;
@@ -39,15 +39,16 @@ class EPollPoller : public Poller
   static const int kInitEventListSize = 16;
 
   static const char* operationToString(int op);
-
+  /// 找到活跃的channel
   void fillActiveChannels(int numEvents,
                           ChannelList* activeChannels) const;
   // update channel
   void update(int operation, Channel* channel);
-
+  /// event 列表, event是一个poll_event 结构体
   typedef std::vector<struct epoll_event> EventList;
-
+  /// epoll文件描述符
   int epollfd_;
+  /// EventList
   EventList events_;
 };
 

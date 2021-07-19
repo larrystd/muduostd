@@ -31,6 +31,7 @@ class Channel;
 class Poller : noncopyable
 {
  public:
+  /// channel 列表
   typedef std::vector<Channel*> ChannelList;
 
   // 传入EventLoop
@@ -39,11 +40,12 @@ class Poller : noncopyable
 
   /// Polls the I/O events.
   /// Must be called in the loop thread.
-  /// poll函数是一个虚函数，需要用户根据特点进行重写
+  /// poll函数是一个虚函数，具体的io多路复用方法poll, select, epoll对其重写
   virtual Timestamp poll(int timeoutMs, ChannelList* activeChannels) = 0;
 
   /// Changes the interested I/O events.
   /// Must be called in the loop thread.
+  /// 同样需要具体方法重写
   virtual void updateChannel(Channel* channel) = 0;
 
   /// Remove the channel, when it destructs.
@@ -60,6 +62,7 @@ class Poller : noncopyable
   }
 
  protected:
+ /// 一个fd->channel 的map
   typedef std::map<int, Channel*> ChannelMap;
   ChannelMap channels_;
 

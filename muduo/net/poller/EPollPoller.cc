@@ -39,8 +39,10 @@ const int kAdded = 1;
 const int kDeleted = 2;
 }
 
+/// 初始化 (1) 初始化父类Poller
+/// (2) 创建epoll_fd 通过epoll_create1
 EPollPoller::EPollPoller(EventLoop* loop)
-  : Poller(loop),
+  : Poller(loop), 
     epollfd_(::epoll_create1(EPOLL_CLOEXEC)),
     events_(kInitEventListSize)
 {
@@ -50,14 +52,18 @@ EPollPoller::EPollPoller(EventLoop* loop)
   }
 }
 
+/// 关闭epoll描述符
 EPollPoller::~EPollPoller()
 {
   ::close(epollfd_);
 }
 
+/// poll
 Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
 {
   LOG_TRACE << "fd total count " << channels_.size();
+  /// 调用epoll_wait获取活跃的events_
+
   int numEvents = ::epoll_wait(epollfd_,
                                &*events_.begin(),
                                static_cast<int>(events_.size()),
@@ -67,6 +73,7 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
   if (numEvents > 0)
   {
     LOG_TRACE << numEvents << " events happened";
+    /// 
     fillActiveChannels(numEvents, activeChannels);
     if (implicit_cast<size_t>(numEvents) == events_.size())
     {
@@ -89,15 +96,19 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
   return now;
 }
 
+/// 将活跃的events 转型channel, channel的revents就是epoll_event的event成员
+/// 形成activeChannels
 void EPollPoller::fillActiveChannels(int numEvents,
                                      ChannelList* activeChannels) const
 {
   assert(implicit_cast<size_t>(numEvents) <= events_.size());
   for (int i = 0; i < numEvents; ++i)
   {
+    /// 转型
     Channel* channel = static_cast<Channel*>(events_[i].data.ptr);
 #ifndef NDEBUG
     int fd = channel->fd();
+    /// 在channels_中查找活跃的fd key
     ChannelMap::const_iterator it = channels_.find(fd);
     assert(it != channels_.end());
     assert(it->second == channel);
@@ -107,7 +118,7 @@ void EPollPoller::fillActiveChannels(int numEvents,
   }
 }
 
-/// 更新某个channel
+/// 用新的channel更新, 在channelmap中设置关联
 void EPollPoller::updateChannel(Channel* channel)
 {
   Poller::assertInLoopThread();
@@ -120,6 +131,7 @@ void EPollPoller::updateChannel(Channel* channel)
     int fd = channel->fd();
     if (index == kNew)
     {
+      /// 对fd设置新的channel
       assert(channels_.find(fd) == channels_.end());
       channels_[fd] = channel;
     }
@@ -128,8 +140,10 @@ void EPollPoller::updateChannel(Channel* channel)
       assert(channels_.find(fd) != channels_.end());
       assert(channels_[fd] == channel);
     }
-
+    // 添加操作
     channel->set_index(kAdded);
+
+    /// 在epoll中添加注册channel的fd
     update(EPOLL_CTL_ADD, channel);
   }
   else
@@ -143,6 +157,7 @@ void EPollPoller::updateChannel(Channel* channel)
     if (channel->isNoneEvent())
     {
       update(EPOLL_CTL_DEL, channel);
+      /// delete操作
       channel->set_index(kDeleted);
     }
     else
@@ -152,6 +167,7 @@ void EPollPoller::updateChannel(Channel* channel)
   }
 }
 
+/// 在channelmap中删除关联
 void EPollPoller::removeChannel(Channel* channel)
 {
   Poller::assertInLoopThread();
@@ -167,7 +183,7 @@ void EPollPoller::removeChannel(Channel* channel)
   size_t n = channels_.erase(fd);
   (void)n;
   assert(n == 1);
-
+  /// 在epoll中删除channel的fd
   if (index == kAdded)
   {
     update(EPOLL_CTL_DEL, channel);
@@ -175,7 +191,7 @@ void EPollPoller::removeChannel(Channel* channel)
   channel->set_index(kNew);
 }
 
-/// 更新poll的fd
+/// 更新poll的fd， 在epoll中注册channel的fd
 void EPollPoller::update(int operation, Channel* channel)
 {
   struct epoll_event event;

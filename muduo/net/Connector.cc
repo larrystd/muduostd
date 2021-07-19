@@ -37,16 +37,20 @@ Connector::~Connector()
   assert(!channel_);
 }
 
+/// 在io线程中执行startInloop函数
 void Connector::start()
 {
-  connect_ = true;
+  connect_ = true;  /// 先设置true, 没连接上可以重试，一直没连接上设置为false
   loop_->runInLoop(std::bind(&Connector::startInLoop, this)); // FIXME: unsafe
 }
 
+
 void Connector::startInLoop()
 {
+  /// 保证在建立连接的io线程执行
   loop_->assertInLoopThread();
   assert(state_ == kDisconnected);
+  // 执行连接
   if (connect_)
   {
     connect();
@@ -75,17 +79,22 @@ void Connector::stopInLoop()
   }
 }
 
+/// 执行连接
 void Connector::connect()
 {
+  /// 创建sockfd(新建)
   int sockfd = sockets::createNonblockingOrDie(serverAddr_.family());
+  /// 连接地址
   int ret = sockets::connect(sockfd, serverAddr_.getSockAddr());
   int savedErrno = (ret == 0) ? 0 : errno;
+  /// 注意socket是一次性的，一旦发生错误就不可恢复，只能关闭重来
   switch (savedErrno)
   {
     case 0:
     case EINPROGRESS:
     case EINTR:
     case EISCONN:
+    /// 以上没问题，执行连接
       connecting(sockfd);
       break;
 
@@ -93,7 +102,8 @@ void Connector::connect()
     case EADDRINUSE:
     case EADDRNOTAVAIL:
     case ECONNREFUSED:
-    case ENETUNREACH:
+    case ENETUNREACH: 
+    // 以上延时重试
       retry(sockfd);
       break;
 
@@ -116,6 +126,7 @@ void Connector::connect()
   }
 }
 
+/// 重启连接
 void Connector::restart()
 {
   loop_->assertInLoopThread();
@@ -125,11 +136,13 @@ void Connector::restart()
   startInLoop();
 }
 
+/// 将建立连接的sockfd封装成channel
 void Connector::connecting(int sockfd)
 {
   setState(kConnecting);
   assert(!channel_);
   channel_.reset(new Channel(loop_, sockfd));
+
   channel_->setWriteCallback(
       std::bind(&Connector::handleWrite, this)); // FIXME: unsafe
   channel_->setErrorCallback(
@@ -140,6 +153,7 @@ void Connector::connecting(int sockfd)
   channel_->enableWriting();
 }
 
+/// remove channel
 int Connector::removeAndResetChannel()
 {
   channel_->disableAll();
@@ -150,31 +164,39 @@ int Connector::removeAndResetChannel()
   return sockfd;
 }
 
+/// 析构channel_
 void Connector::resetChannel()
 {
+  /// shared_ptr.reset
   channel_.reset();
 }
 
+/// 处理写事件的回调函数
+/// 如果连接成功, 可写触发。但可写触发不一定表示真的连接成功
 void Connector::handleWrite()
 {
   LOG_TRACE << "Connector::handleWrite " << state_;
 
   if (state_ == kConnecting)
   {
-    int sockfd = removeAndResetChannel();
+    int sockfd = removeAndResetChannel(); /// channel被销毁
     int err = sockets::getSocketError(sockfd);
+    /// 如果发生错误，重试
     if (err)
     {
       LOG_WARN << "Connector::handleWrite - SO_ERROR = "
                << err << " " << strerror_tl(err);
       retry(sockfd);
     }
+    /// 处理自连接，即(sourceIp, sourcePort) = (desIp, desPort)的情况
     else if (sockets::isSelfConnect(sockfd))
     {
       LOG_WARN << "Connector::handleWrite - Self connect";
+      /// 重新连接
       retry(sockfd);
     }
     else
+    /// 这回是真的连接成功
     {
       setState(kConnected);
       if (connect_)
@@ -194,6 +216,7 @@ void Connector::handleWrite()
   }
 }
 
+/// 错误回调函数
 void Connector::handleError()
 {
   LOG_ERROR << "Connector::handleError state=" << state_;
@@ -206,11 +229,14 @@ void Connector::handleError()
   }
 }
 
+
+/// 关闭sockfd, 重试startInLoop
 void Connector::retry(int sockfd)
 {
+  /// 关闭sockfd
   sockets::close(sockfd);
   setState(kDisconnected);
-  if (connect_)
+  if (connect_) /// 定时重试
   {
     LOG_INFO << "Connector::retry - Retry connecting to " << serverAddr_.toIpPort()
              << " in " << retryDelayMs_ << " milliseconds. ";

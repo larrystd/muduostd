@@ -27,25 +27,26 @@ class EventLoop;
 /// channel 网络连接的抽象
 /// A selectable I/O channel.
 ///
-/// This class doesn't own the file descriptor.
-/// The file descriptor could be a socket,
-/// an eventfd, a timerfd, or a signalfd
-/// loop通过poll获取活跃的channel，channel主要是调用handlEvent来进行对应的ReadCallback， WriteCallback, CloseCallback, ErrorCallback处理
-/// 具体的处理函数需要外界提供之
-/// Channel调用loop_->updateChannel(this)等来注册事件的操作
-/// 监听文件描述符是否可读，可写等
+/// 关键作用1, 设置回调函数ReadCallback， WriteCallback, CloseCallback, ErrorCallback
+/// 关键作用2, 设置channel可读可写, 具体的通过update poll event实现
+/// 关键作用3, 基于poll传回的revent选择调用对应回调函数进行处理
+/// 作用4, 将events_, revents_ 格式化成字符串输出之
 
 class Channel : noncopyable
 {
  public:
-  // event回调函数，read回调
+  // event回调函数类型，包括写回调，关闭回调，错误回调
   typedef std::function<void()> EventCallback;
+  // 读事件回调函数
   typedef std::function<void(Timestamp)> ReadEventCallback;
-  // 构造，传入EventLoop和fd
+
+  // 构造函数，传入EventLoop和监听的fd
   Channel(EventLoop* loop, int fd);
   ~Channel();
-  // 处理事件函数
+
+  // 事件处理函数，传入接收时间
   void handleEvent(Timestamp receiveTime);
+
   // 设置回调函数，分别是写回调，读回调，关闭回调，错误回调
   void setReadCallback(ReadEventCallback cb)
   { readCallback_ = std::move(cb); }
@@ -56,13 +57,13 @@ class Channel : noncopyable
   void setErrorCallback(EventCallback cb)
   { errorCallback_ = std::move(cb); }
 
-  /// Tie this channel to the owner object managed by shared_ptr,
-  /// prevent the owner object being destroyed in handleEvent.
-  /// 绑定const std::shared_ptr<void>& obj
+  /// 传入shared_ptr对象 绑定const std::shared_ptr<void>& obj
   void tie(const std::shared_ptr<void>&);
+
 
   int fd() const { return fd_; }
   int events() const { return events_; }
+
   void set_revents(int revt) { revents_ = revt; } // used by pollers
   // int revents() const { return revents_; }
   bool isNoneEvent() const { return events_ == kNoneEvent; }
@@ -78,6 +79,7 @@ class Channel : noncopyable
 
   // for Poller
   int index() { return index_; }
+  /// 设置
   void set_index(int idx) { index_ = idx; }
 
   // for debug
@@ -93,20 +95,24 @@ class Channel : noncopyable
   static string eventsToString(int fd, int ev);
   /// 更新channel
   void update();
-  void handleEventWithGuard(Timestamp receiveTime);
 
+  void handleEventWithGuard(Timestamp receiveTime);
+  /// 三种event, 空事件, 读事件, 写事件
   static const int kNoneEvent;
   static const int kReadEvent;
   static const int kWriteEvent;
 
   EventLoop* loop_;
   const int  fd_;
+
   int        events_;
+  // poll 传回的事件
   int        revents_; // it's the received event types of epoll or poll
+  /// poll要对fd进行的操作，例如kdeleted等
   int        index_; // used by Poller.
   bool       logHup_;
 
-  // 
+  // 绑定对象的软连接
   std::weak_ptr<void> tie_;
   bool tied_;
   bool eventHandling_;

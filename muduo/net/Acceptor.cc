@@ -22,6 +22,8 @@
 using namespace muduo;
 using namespace muduo::net;
 
+/// 初始化包括两部分, 服务端socket有两种，(1)建立服务端监听socket
+/// (2) 设置服务端连接channel, 并设置可读回调函数。一旦监听到socket，可读，即调用回调函数
 Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport)
   : loop_(loop),
     acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
@@ -45,20 +47,22 @@ Acceptor::~Acceptor()
   ::close(idleFd_);
 }
 
+/// 监听客户端socket
 void Acceptor::listen()
 {
   loop_->assertInLoopThread();
   listening_ = true;
   acceptSocket_.listen();
-  // 该通道可读
+  // 设置服务端通道可读
   acceptChannel_.enableReading(); 
 }
 
+/// 可读回调函数，建立连接
 void Acceptor::handleRead()
 {
   loop_->assertInLoopThread();
   InetAddress peerAddr;
-  //FIXME loop until no more
+  //接受
   int connfd = acceptSocket_.accept(&peerAddr); // accept socket
   if (connfd >= 0)
   {

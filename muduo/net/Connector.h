@@ -8,6 +8,10 @@
 //
 // This is an internal header file, you should not include this.
 
+/// 关键作用, 作为客户端使用的Connector, 发起连接
+/// 判断连接是否成功，如果socket只可写，说明连接成功
+/// 根据连接是否成功，执行回调函数或重试等操作
+
 #ifndef MUDUO_NET_CONNECTOR_H
 #define MUDUO_NET_CONNECTOR_H
 
@@ -30,11 +34,12 @@ class Connector : noncopyable,
                   public std::enable_shared_from_this<Connector>
 {
  public:
+ /// 新连接的回调函数
   typedef std::function<void (int sockfd)> NewConnectionCallback;
 
   Connector(EventLoop* loop, const InetAddress& serverAddr);
   ~Connector();
-
+  // 设置连接回调函数
   void setNewConnectionCallback(const NewConnectionCallback& cb)
   { newConnectionCallback_ = cb; }
 
@@ -54,6 +59,7 @@ class Connector : noncopyable,
   void stopInLoop();
   void connect();
   void connecting(int sockfd);
+  
   void handleWrite();
   void handleError();
   void retry(int sockfd);

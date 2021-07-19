@@ -18,8 +18,9 @@ using namespace muduo;
 using namespace muduo::net;
 
 const int Channel::kNoneEvent = 0;
-const int Channel::kReadEvent = POLLIN | POLLPRI;
-const int Channel::kWriteEvent = POLLOUT;
+const int Channel::kReadEvent = POLLIN | POLLPRI; // 01 | 10 = 11
+const int Channel::kWriteEvent = POLLOUT; // 100
+
 
 Channel::Channel(EventLoop* loop, int fd__)
   : loop_(loop),
@@ -50,12 +51,13 @@ void Channel::tie(const std::shared_ptr<void>& obj)
   tied_ = true;
 }
 
+/// 向poll更新event(即channel)
 void Channel::update()
 {
   addedToLoop_ = true;
   loop_->updateChannel(this);
 }
-/// 删除某个channel
+/// 向poll关闭某个event
 void Channel::remove()
 {
   assert(isNoneEvent());
@@ -68,6 +70,8 @@ void Channel::handleEvent(Timestamp receiveTime)
   std::shared_ptr<void> guard;
   if (tied_)
   {
+    // 如果绑定了对象，要看对象是否存活
+    // 如果对象存在，lock()函数返回一个指向共享对象的shared_ptr，否则返回一个空shared_ptr。
     guard = tie_.lock();
     if (guard)
     {
@@ -80,7 +84,8 @@ void Channel::handleEvent(Timestamp receiveTime)
   }
 }
 
-// 根据revents_和poll的options来执行各种回调函数
+// 根据poll 发来的revents_, 执行各种回调函数
+// 回调函数类型, closeCallback_, errorCallback_, readCallback_, writeCallback_
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
   eventHandling_ = true;
@@ -114,6 +119,7 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
   eventHandling_ = false;
 }
 
+// tostrings()
 string Channel::reventsToString() const
 {
   return eventsToString(fd_, revents_);

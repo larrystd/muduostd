@@ -30,22 +30,18 @@ class InetAddress;
 class Acceptor : noncopyable
 {
  public:
- /// NewConnectionCallback 传入的参数为sockfd和InetAddress
+ /// 服务端的连接回调函数
   typedef std::function<void (int sockfd, const InetAddress&)> NewConnectionCallback;
 
   Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
   ~Acceptor();
-
+  /// 设置连接回调函数
   void setNewConnectionCallback(const NewConnectionCallback& cb)
   { newConnectionCallback_ = cb; }
-
+  /// 监听客户端连接
   void listen();
 
   bool listening() const { return listening_; }
-
-  // Deprecated, use the correct spelling one above.
-  // Leave the wrong spelling here in case one needs to grep it for error messages.
-  // bool listenning() const { return listening(); }
 
  private:
   void handleRead();
