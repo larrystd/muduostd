@@ -120,7 +120,8 @@ class EventLoop : noncopyable
       abortNotInLoopThread();
     }
   }
-  bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); } // 是否为线程
+  /// 当前线程idCurrentThread::tid() 为 构建thread_loop线程的id
+  bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); } 
   // bool callingPendingFunctors() const { return callingPendingFunctors_; }
   bool eventHandling() const { return eventHandling_; }
 
@@ -140,7 +141,7 @@ class EventLoop : noncopyable
   void abortNotInLoopThread();
   // read waked up fd_
   void handleRead();  // waked up
-  // ??
+  // 运行等待的任务
   void doPendingFunctors();
   // 打印ChannelList activeChannels_;
   void printActiveChannels() const; // DEBUG

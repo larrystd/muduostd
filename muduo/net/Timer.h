@@ -33,7 +33,7 @@ class Timer : noncopyable
       repeat_(interval > 0.0),
       sequence_(s_numCreated_.incrementAndGet())
   { }
-
+  /// 运行回调函数
   void run() const
   {
     callback_();

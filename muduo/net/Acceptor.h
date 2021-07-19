@@ -35,7 +35,8 @@ class Acceptor : noncopyable
 
   Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
   ~Acceptor();
-  /// 设置连接回调函数
+
+  /// 设置连接回调函数, 对于服务端, 接受连接之后封装连接为connection
   void setNewConnectionCallback(const NewConnectionCallback& cb)
   { newConnectionCallback_ = cb; }
   /// 监听客户端连接

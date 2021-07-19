@@ -20,7 +20,7 @@ static_assert(sizeof(Timestamp) == sizeof(int64_t),
               "Timestamp should be same size as int64_t");
 
 
-string Timesstamp::toString() const {
+string Timestamp::toString() const {
   char buf[32] = {0};
   int64_t seconds = microSecondsSinceEpoch_ / kMicroSecondsPerSecond;
   int64_t microseconds = microSecondsSinceEpoch_ % kMicroSecondsPerSecond;

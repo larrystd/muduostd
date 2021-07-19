@@ -55,6 +55,7 @@ TcpClient::TcpClient(EventLoop* loop,
                      const InetAddress& serverAddr,
                      const string& nameArg)
   : loop_(CHECK_NOTNULL(loop)),
+
     connector_(new Connector(loop, serverAddr)),
     name_(nameArg),
     connectionCallback_(defaultConnectionCallback),
@@ -63,6 +64,7 @@ TcpClient::TcpClient(EventLoop* loop,
     connect_(true),
     nextConnId_(1)
 {
+  /// 连接后回调函数
   connector_->setNewConnectionCallback(
       std::bind(&TcpClient::newConnection, this, _1));
   // FIXME setConnectFailedCallback
@@ -101,11 +103,13 @@ TcpClient::~TcpClient()
   }
 }
 
+/// 连接, 调用connector_
 void TcpClient::connect()
 {
   // FIXME: check state
   LOG_INFO << "TcpClient::connect[" << name_ << "] - connecting to "
            << connector_->serverAddress().toIpPort();
+  /// 连接
   connect_ = true;
   connector_->start();
 }
@@ -129,6 +133,7 @@ void TcpClient::stop()
   connector_->stop();
 }
 
+/// 封装连接
 void TcpClient::newConnection(int sockfd)
 {
   loop_->assertInLoopThread();
@@ -156,6 +161,8 @@ void TcpClient::newConnection(int sockfd)
     MutexLockGuard lock(mutex_);
     connection_ = conn;
   }
+
+  /// 连接建立，注册fd
   conn->connectEstablished();
 }
 
@@ -169,9 +176,10 @@ void TcpClient::removeConnection(const TcpConnectionPtr& conn)
     assert(connection_ == conn);
     connection_.reset();
   }
-
+  /// 执行connectDestroyed
   loop_->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
-  if (retry_ && connect_)
+
+  if (retry_ && connect_) /// 重试
   {
     LOG_INFO << "TcpClient::connect[" << name_ << "] - Reconnecting to "
              << connector_->serverAddress().toIpPort();

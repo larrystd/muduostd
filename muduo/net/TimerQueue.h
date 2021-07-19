@@ -67,6 +67,7 @@ class TimerQueue : noncopyable
   std::vector<Entry> getExpired(Timestamp now);
   void reset(const std::vector<Entry>& expired, Timestamp now);
 
+  /// 插入timer
   bool insert(Timer* timer);
 
   EventLoop* loop_;

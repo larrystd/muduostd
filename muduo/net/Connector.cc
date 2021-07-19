@@ -201,6 +201,7 @@ void Connector::handleWrite()
       setState(kConnected);
       if (connect_)
       {
+        /// 连接回调函数
         newConnectionCallback_(sockfd);
       }
       else

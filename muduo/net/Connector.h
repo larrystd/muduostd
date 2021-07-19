@@ -71,6 +71,7 @@ class Connector : noncopyable,
   bool connect_; // atomic
   States state_;  // FIXME: use atomic variable
   std::unique_ptr<Channel> channel_;
+  
   NewConnectionCallback newConnectionCallback_;
   int retryDelayMs_;
 };

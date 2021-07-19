@@ -29,10 +29,12 @@ bool Socket::getTcpInfo(struct tcp_info* tcpi) const
 {
   socklen_t len = sizeof(*tcpi);
   memZero(tcpi, len);
+  /// 获取套接字选项设置
+  /// tcpi接收选项结果
   return ::getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
 }
 
-// ::getsocketopt string format
+// ::getsocketopt string format, 获取套接字选项用字符串输出
 bool Socket::getTcpInfoString(char* buf, int len) const
 {
   struct tcp_info tcpi;
@@ -59,16 +61,19 @@ bool Socket::getTcpInfoString(char* buf, int len) const
   return ok;
 }
 
+/// 绑定地址
 void Socket::bindAddress(const InetAddress& addr)
 {
   sockets::bindOrDie(sockfd_, addr.getSockAddr());
 }
 
+/// 监听sockfd_
 void Socket::listen()
 {
   sockets::listenOrDie(sockfd_);
 }
 
+/// 接受, 返回的connfd
 int Socket::accept(InetAddress* peeraddr)
 {
   struct sockaddr_in6 addr;
@@ -81,6 +86,7 @@ int Socket::accept(InetAddress* peeraddr)
   return connfd;
 }
 
+/// shutdownWrite
 void Socket::shutdownWrite()
 {
   sockets::shutdownWrite(sockfd_);
@@ -120,6 +126,7 @@ void Socket::setReusePort(bool on)
 #endif
 }
 
+/// 设置SO_KEEPALIVE
 void Socket::setKeepAlive(bool on)
 {
   int optval = on ? 1 : 0;

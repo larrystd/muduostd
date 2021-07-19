@@ -73,7 +73,7 @@ class TcpServer : noncopyable
   /// It's harmless to call it multiple times.
   /// Thread safe.
   void start();
-
+  /// 设置回调函数
   /// Set connection callback.
   /// Not thread safe.
   void setConnectionCallback(const ConnectionCallback& cb)
@@ -97,13 +97,16 @@ class TcpServer : noncopyable
   /// Not thread safe, but in loop
   void removeConnectionInLoop(const TcpConnectionPtr& conn);
 
+  /// 连接的映射, name->TcpConnection
   typedef std::map<string, TcpConnectionPtr> ConnectionMap;
 
   EventLoop* loop_;  // the acceptor loop
   const string ipPort_;
   const string name_;
+
   std::unique_ptr<Acceptor> acceptor_; // avoid revealing Acceptor
   std::shared_ptr<EventLoopThreadPool> threadPool_;
+  /// 回调函数
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
   WriteCompleteCallback writeCompleteCallback_;

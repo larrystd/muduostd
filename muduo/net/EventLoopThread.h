@@ -15,11 +15,10 @@
 #include "muduo/base/Mutex.h"
 #include "muduo/base/Thread.h"
 
-// 顾名思义，处理eventloop的线程，EventLoopThread也是在thread上进行封装
 // EventLoopThread，既要有eventloop，也要有thread
-// 注册一个回调函数，void(EventLoop*) ThreadInitCallback
-// 需要一个EventLoop，该线程注册完EventLoop之后
-// 调用threadFunc会让eventloop线程注册一个回调函数
+// 注册一个回调函数，创建新线程后执行回调void(EventLoop*) ThreadInitCallback
+// 新线程会创建一个eventloop, 执行loop循环, 当创建loop之后主线程获取并返回之
+
 namespace muduo
 {
 namespace net
@@ -30,6 +29,7 @@ class EventLoop;
 class EventLoopThread : noncopyable
 {
  public:
+ /// eventloop thread创建之后的回调函数, 参数为void(EventLoop*)
   typedef std::function<void(EventLoop*)> ThreadInitCallback;
 
   EventLoopThread(const ThreadInitCallback& cb = ThreadInitCallback(),
@@ -42,7 +42,7 @@ class EventLoopThread : noncopyable
 
   EventLoop* loop_ GUARDED_BY(mutex_);
   bool exiting_;
-  // thread
+  // 新thread创建
   Thread thread_;
   MutexLock mutex_;
   Condition cond_ GUARDED_BY(mutex_);

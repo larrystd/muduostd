@@ -32,7 +32,7 @@ TcpServer::TcpServer(EventLoop* loop,
     messageCallback_(defaultMessageCallback),
     nextConnId_(1)
 {
-  /// 新建连接的回调函数
+  /// 新建连接的回调函数, accept之后调用
   acceptor_->setNewConnectionCallback(
       std::bind(&TcpServer::newConnection, this, _1, _2));
 }
@@ -61,11 +61,13 @@ void TcpServer::start()
 {
   if (started_.getAndSet(1) == 0)
   {
+    /// 线程池启动
     threadPool_->start(threadInitCallback_);
 
     assert(!acceptor_->listening());
 
-    // 在io进程中运行listen监听
+    /// 在eventloop进程中运行listen监听
+    /// 
     loop_->runInLoop(
         std::bind(&Acceptor::listen, get_pointer(acceptor_)));
   }
@@ -75,6 +77,7 @@ void TcpServer::start()
 void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
 {
   loop_->assertInLoopThread();
+  /// 下一个eventloop
   EventLoop* ioLoop = threadPool_->getNextLoop();
   char buf[64];
   snprintf(buf, sizeof buf, "-%s#%d", ipPort_.c_str(), nextConnId_);
@@ -84,15 +87,17 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
   LOG_INFO << "TcpServer::newConnection [" << name_
            << "] - new connection [" << connName
            << "] from " << peerAddr.toIpPort();
+  /// 封装地址
   InetAddress localAddr(sockets::getLocalAddr(sockfd));
-  // FIXME poll with zero timeout to double confirm the new connection
-  // FIXME use make_shared if necessary
-  // 封装新连接到TcpConnection对象，用std::shared_ptr<TcpConnection>维护，储存到map中 connections_[connName] = conn
+  
+  // 封装新连接到TcpConnection对象(主要是sockfd)，用std::shared_ptr<TcpConnection>维护，储存到map中 connections_[connName] = conn
   TcpConnectionPtr conn(new TcpConnection(ioLoop,
                                           connName,
                                           sockfd,
                                           localAddr,
                                           peerAddr));
+  
+  /// 回调函数
   connections_[connName] = conn;
   conn->setConnectionCallback(connectionCallback_);
   conn->setMessageCallback(messageCallback_);
@@ -100,7 +105,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
   conn->setCloseCallback(
       std::bind(&TcpServer::removeConnection, this, _1)); // FIXME: unsafe
 
-  // 在io线程上执行&TcpConnection::connectEstablished
+  // 在io线程上执行&TcpConnection::connectEstablished, 连接建立主要是注册channel到epoll
   ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 }
 
@@ -115,10 +120,13 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr& conn)
   loop_->assertInLoopThread();
   LOG_INFO << "TcpServer::removeConnectionInLoop [" << name_
            << "] - connection " << conn->name();
+  /// 从连接map中删除
   size_t n = connections_.erase(conn->name());
   (void)n;
   assert(n == 1);
+  /// 得到ioLoop
   EventLoop* ioLoop = conn->getLoop();
+  /// 执行connectDestroyed
   ioLoop->queueInLoop(
       std::bind(&TcpConnection::connectDestroyed, conn));
 }

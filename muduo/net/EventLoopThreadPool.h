@@ -18,7 +18,7 @@
 #include <memory>
 #include <vector>
 
-// EventLoopThreadPool，处理若干EventLoop。包含若干EventLoopThreads
+// 
 namespace muduo
 {
 
@@ -31,6 +31,7 @@ class EventLoopThread;
 class EventLoopThreadPool : noncopyable
 {
  public:
+ /// 线程初始化回调函数
   typedef std::function<void(EventLoop*)> ThreadInitCallback;
 
   EventLoopThreadPool(EventLoop* baseLoop, const string& nameArg);
@@ -57,10 +58,13 @@ class EventLoopThreadPool : noncopyable
 
   EventLoop* baseLoop_;
   string name_;
+  
   bool started_;
   int numThreads_;
   int next_;
+  /// 线程列表
   std::vector<std::unique_ptr<EventLoopThread>> threads_;
+  /// loop 列表
   std::vector<EventLoop*> loops_;
 };
 

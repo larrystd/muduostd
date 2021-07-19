@@ -29,6 +29,8 @@ namespace muduo
 {
 namespace net
 {
+
+/// 更上一层的Tcp连接
 /// 协调三个class, Channel, EventLoop, Socket
 /// connection的读写需要调用socket
 /// 该TcpConnection来自哪个EventLoop?
@@ -58,21 +60,23 @@ class TcpConnection : noncopyable,
                 const InetAddress& peerAddr);
   ~TcpConnection();
 
+  // connection的loop_
   EventLoop* getLoop() const { return loop_; }
   const string& name() const { return name_; }
   const InetAddress& localAddress() const { return localAddr_; }
   const InetAddress& peerAddress() const { return peerAddr_; }
+
   bool connected() const { return state_ == kConnected; }
   bool disconnected() const { return state_ == kDisconnected; }
   // return true if success.
   bool getTcpInfo(struct tcp_info*) const;
   string getTcpInfoString() const;
 
-  // void send(string&& message); // C++11
+  // 发送message
   void send(const void* message, int len);
   void send(const StringPiece& message);
-  // void send(Buffer&& message); // C++11
   void send(Buffer* message);  // this one will swap data
+
   void shutdown(); // NOT thread safe, no simultaneous calling
   // void shutdownAndForceCloseAfter(double seconds); // NOT thread safe, no simultaneous calling
   void forceClose();
@@ -81,6 +85,7 @@ class TcpConnection : noncopyable,
   // reading or not
   void startRead();
   void stopRead();
+
   bool isReading() const { return reading_; }; // NOT thread safe, may race with start/stopReadInLoop
 
   void setContext(const boost::any& context)
@@ -91,7 +96,8 @@ class TcpConnection : noncopyable,
 
   boost::any* getMutableContext()
   { return &context_; }
-
+  
+  // 设置回调函数
   void setConnectionCallback(const ConnectionCallback& cb)
   { connectionCallback_ = cb; }
 
@@ -104,10 +110,11 @@ class TcpConnection : noncopyable,
   void setHighWaterMarkCallback(const HighWaterMarkCallback& cb, size_t highWaterMark)
   { highWaterMarkCallback_ = cb; highWaterMark_ = highWaterMark; }
 
-  /// Advanced interface
+  /// 输入的Buffer
   Buffer* inputBuffer()
   { return &inputBuffer_; }
 
+  /// 输出的Buffer
   Buffer* outputBuffer()
   { return &outputBuffer_; }
 
@@ -146,12 +153,15 @@ class TcpConnection : noncopyable,
   std::unique_ptr<Channel> channel_;
   const InetAddress localAddr_;
   const InetAddress peerAddr_;
+  /// 回调函数
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
   WriteCompleteCallback writeCompleteCallback_;
   HighWaterMarkCallback highWaterMarkCallback_;
   CloseCallback closeCallback_;
   size_t highWaterMark_;
+
+  /// 缓冲区
   Buffer inputBuffer_;
   Buffer outputBuffer_; // FIXME: use list<Buffer> as output buffer.
   boost::any context_;

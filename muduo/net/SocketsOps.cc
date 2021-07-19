@@ -157,6 +157,7 @@ int sockets::accept(int sockfd, struct sockaddr_in6* addr)
   return connfd;
 }
 
+/// 调用socket底层方法
 int sockets::connect(int sockfd, const struct sockaddr* addr)
 {
   return ::connect(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
