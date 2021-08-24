@@ -101,7 +101,7 @@ __END_DECLS
                          __assert_perror_fail (errnum, __FILE__, __LINE__, __func__);})
 
 #else  // CHECK_PTHREAD_RETURN_VALUE
-
+// 检查函数返回值是否为成功，失败了就终止程序。
 #define MCHECK(ret) ({ __typeof__ (ret) errnum = (ret);         \
                        assert(errnum == 0); (void) errnum;})
 

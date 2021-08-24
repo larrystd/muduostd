@@ -20,6 +20,8 @@ namespace muduo
 class ThreadPool : noncopyable
 {
  public:
+
+ /// 线程需要执行的函数, std::function<void() >
   typedef std::function<void ()> Task;
 
   explicit ThreadPool(const string& nameArg = string("ThreadPool"));
@@ -27,6 +29,8 @@ class ThreadPool : noncopyable
 
   // Must be called before start().
   void setMaxQueueSize(int maxSize) { maxQueueSize_ = maxSize; }
+
+  /// 线程初始化之后的回调函数
   void setThreadInitCallback(const Task& cb)
   { threadInitCallback_ = cb; }
 
@@ -35,7 +39,7 @@ class ThreadPool : noncopyable
 
   const string& name() const
   { return name_; }
-
+  /// 任务队列当前大小
   size_t queueSize() const;
 
   // Could block if maxQueueSize > 0
@@ -44,7 +48,7 @@ class ThreadPool : noncopyable
   // So we don't need to overload a const& and an && versions
   // as we do in (Bounded)BlockingQueue.
   // https://stackoverflow.com/a/25408989
-  void run(Task f);
+  void run(Task f); /// 使用线程池执行任务
 
  private:
   bool isFull() const REQUIRES(mutex_);
@@ -55,8 +59,11 @@ class ThreadPool : noncopyable
   Condition notEmpty_ GUARDED_BY(mutex_);
   Condition notFull_ GUARDED_BY(mutex_);
   string name_;
+  /// 线程初始化回调函数
   Task threadInitCallback_;
+  /// thread vectors, 用unique_ptr维护, 因为thread不可拷贝
   std::vector<std::unique_ptr<muduo::Thread>> threads_;
+  /// 任务队列
   std::deque<Task> queue_ GUARDED_BY(mutex_);
   size_t maxQueueSize_;
   bool running_;

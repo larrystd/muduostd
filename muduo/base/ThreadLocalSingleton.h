@@ -22,13 +22,13 @@ class ThreadLocalSingleton : noncopyable
   ThreadLocalSingleton() = delete;
   ~ThreadLocalSingleton() = delete;
 
-
+  /// 获取线程私有变量的唯一intance
   static T& instance()
   {
     if (!t_value_)
     {
       t_value_ = new T(); // 线程内部对象
-      deleter_.set(t_value_);
+      deleter_.set(t_value_); /// 置入线程
     }
     return *t_value_;
   }
@@ -54,7 +54,7 @@ class ThreadLocalSingleton : noncopyable
    
     Deleter()
     {
-    // 创建单独的线程存储变量pkey_, 清理函数为destructor线程释放该线程存储的时候被调用。
+    // 创建单独的线程变量的键pkey_, 清理函数为destructor线程释放该线程存储的时候被调用。
       pthread_key_create(&pkey_, &ThreadLocalSingleton::destructor);
     }
 
@@ -66,14 +66,16 @@ class ThreadLocalSingleton : noncopyable
     void set(T* newObj)
     {
       assert(pthread_getspecific(pkey_) == NULL);
+      /// 设置线程私有变量
       pthread_setspecific(pkey_, newObj);
     }
 
     pthread_key_t pkey_;
   };
-  // 用static保证了单例模式
+
+  /// 前置__thread说明t_value_是私有变量
   static __thread T* t_value_;
-  static Deleter deleter_;  // 可以直接在外界调用deleter_, 而不用手动new
+  static Deleter deleter_;  
 };
 
 template<typename T>

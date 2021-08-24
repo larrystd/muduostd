@@ -10,6 +10,9 @@ namespace muduo
 {
 
 class noncopyable
+
+/// 拷贝构造函数和操作符设置delete
+/// 构造函数析构函数protected+ default
 {
  public:
   noncopyable(const noncopyable&) = delete;

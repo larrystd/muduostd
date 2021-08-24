@@ -8,21 +8,29 @@
 #include "muduo/base/Exception.h"
 #include "muduo/base/Logging.h"
 
-#include <type_traits>
+#include <type_traits>  /// 一些关于模板编程的支持
 
-#include <errno.h>
+#include <errno.h>    /// 错误事件中的某些库函数表明了什么发生了错误。
 #include <stdio.h>
-#include <unistd.h>
+#include <unistd.h>   /// unix std的意思，是POSIX标准定义的unix类系统定义符号常量的头文件，包含了许多UNIX系统服务的函数原型
 #include <sys/prctl.h>
-#include <sys/syscall.h>
+#include <sys/syscall.h>  /// 系统调用
 #include <sys/types.h>
 #include <linux/unistd.h>
+
+
+/// thread的基本功能是传入一个函数, 调用start()方法开始执行, 并可以返回线程的状态。
+
+/// pthread id是pthread库提供的ID，在系统级别没有意义。pid都是线程组leader的进程ID, 使用`getpid()`获取。而tid是线程ID，`syscall(SYS_gettid)`获取。pid和tid均全局唯一。
+
+/// 基本逻辑, pthread_create创建线程执行startThread, startThread调用ThreadData对象执行对象runInThread()成员方法。
 
 namespace muduo
 {
 namespace detail
 {
 
+/// 得到线程的tid
 pid_t gettid()
 {
   return static_cast<pid_t>(::syscall(SYS_gettid));
@@ -108,7 +116,8 @@ struct ThreadData
   }
 };
 
-// 开启线程
+// 开启线程, pthread_create执行的函数
+/// 传入void*
 void* startThread(void* obj)
 {
   ThreadData* data = static_cast<ThreadData*>(obj);

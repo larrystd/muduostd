@@ -36,7 +36,7 @@ class Condition : noncopyable
   {
     MCHECK(pthread_cond_destroy(&pcond_));
   }
-
+  /// wait pcond_变为true
   void wait()
   {
     MutexLock::UnassignGuard ug(mutex_);
@@ -49,6 +49,7 @@ class Condition : noncopyable
   // returns true if time out, false otherwise.
   bool waitForSeconds(double seconds);
 
+  /// 唤醒wait()的线程
   void notify()
   {
     MCHECK(pthread_cond_signal(&pcond_));
