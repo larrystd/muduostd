@@ -39,6 +39,8 @@ class BlockingQueue : noncopyable
   {
     MutexLockGuard lock(mutex_);
     queue_.push_back(x);
+
+    /// 队列非空条件变量
     notEmpty_.notify(); // wait morphing saves us
     // http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
   }
@@ -59,8 +61,9 @@ class BlockingQueue : noncopyable
       notEmpty_.wait();
     }
     assert(!queue_.empty());
-    T front(std::move(queue_.front())); // 队首元素出队列, std::move可传递左值或右值,返回右值引用，作为右值使用。
-    queue_.pop_front();
+    /// front是队首元素
+    T front(std::move(queue_.front())); 
+    queue_.pop_front(); // 队首元素出队列
     return front;
   }
 

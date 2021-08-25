@@ -40,6 +40,7 @@ __thread char t_errnobuf[512];
 __thread char t_time[64];
 __thread time_t t_lastSecond;
 
+/// 错误信息
 const char* strerror_tl(int savedErrno)
 {
   return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
@@ -92,22 +93,27 @@ inline LogStream& operator<<(LogStream& s, T v)
 
 inline LogStream& operator<<(LogStream& s, const Logger::SourceFile& v)
 {
+  /// 对LogStream处理, 将data加入到LogStream的buffer中
   s.append(v.data_, v.size_);
   return s;
 }
 
 void defaultOutput(const char* msg, int len)
 {
+  /// 将msg刷新到stdout
   size_t n = fwrite(msg, 1, len, stdout);
   //FIXME check n
   (void)n;
 }
 
+/// 刷新到标准输出
 void defaultFlush()
 {
+  /// 刷新到stdout, 缓存输出到终端
   fflush(stdout);
 }
 
+/// 设置函数
 Logger::OutputFunc g_output = defaultOutput;
 Logger::FlushFunc g_flush = defaultFlush;
 TimeZone g_logTimeZone;
@@ -133,6 +139,7 @@ Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file, int l
   }
 }
 
+/// 格式化时间
 void Logger::Impl::formatTime()
 {
   int64_t microSecondsSinceEpoch = time_.microSecondsSinceEpoch();
@@ -150,7 +157,7 @@ void Logger::Impl::formatTime()
     {
       ::gmtime_r(&seconds, &tm_time); // FIXME TimeZone::fromUtcTime
     }
-
+  /// 将... 根据format格式化, 输出到t_time中
     int len = snprintf(t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",
         tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
         tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
@@ -173,9 +180,12 @@ void Logger::Impl::formatTime()
 
 void Logger::Impl::finish()
 {
+  /// 将结束符加入到stream的缓冲区中
   stream_ << " - " << basename_ << ':' << line_ << '\n';
 }
 
+
+/// 构造函数
 Logger::Logger(SourceFile file, int line)
   : impl_(INFO, 0, file, line)
 {
@@ -197,18 +207,29 @@ Logger::Logger(SourceFile file, int line, bool toAbort)
 {
 }
 
+
+/// 在log析构的时候, flush日志数据
 Logger::~Logger()
 {
+  /// 加入结束符
   impl_.finish();
+  /// 将stream().buffer()拷贝到新的buf中
   const LogStream::Buffer& buf(stream().buffer());
+
+  /// 对buf执行输出函数g_out, 即将msg刷新到stdout
   g_output(buf.data(), buf.length());
+
+  /// 如果日志FATAL
   if (impl_.level_ == FATAL)
   {
+    /// 全部刷新到g_flush中
     g_flush();
+    // 结束线程程序执行
     abort();
   }
 }
 
+/// 日志level
 void Logger::setLogLevel(Logger::LogLevel level)
 {
   g_logLevel = level;

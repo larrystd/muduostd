@@ -28,8 +28,10 @@ class LogFile : noncopyable
           int flushInterval = 3,
           int checkEveryN = 1024);
   ~LogFile();
-
+        
+  // 在缓冲区后添加数据
   void append(const char* logline, int len);
+  /// flush到文件
   void flush();
   bool rollFile();
 
@@ -46,9 +48,13 @@ class LogFile : noncopyable
   int count_;
 
   std::unique_ptr<MutexLock> mutex_;
+
+  /// time_t 长整型, 时间1970年1月1日00时00分00秒(也称为Linux系统的Epoch时间)到当前时刻的秒数。
   time_t startOfPeriod_;
   time_t lastRoll_;
   time_t lastFlush_;
+
+  /// file_, 
   std::unique_ptr<FileUtil::AppendFile> file_;
 
   const static int kRollPerSeconds_ = 60*60*24;

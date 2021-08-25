@@ -24,8 +24,8 @@ namespace muduo
 ///
 
 
-// 多重继承
-// 继承boost的等价比较，小于比较
+// 多重继承,继承boost
+/// 针对时间戳的等价比较，小于比较
 class Timestamp : public muduo::copyable,
                   public boost::equality_comparable<Timestamp>,
                   public boost::less_than_comparable<Timestamp>
@@ -33,7 +33,7 @@ class Timestamp : public muduo::copyable,
  public:
   ///
   /// Constucts an invalid Timestamp.
-  ///
+  /// 时间戳的构造器
   Timestamp()
     : microSecondsSinceEpoch_(0)
   {
@@ -41,13 +41,12 @@ class Timestamp : public muduo::copyable,
 
   ///
   /// Constucts a Timestamp at specific time
-  ///
   /// @param microSecondsSinceEpoch
   explicit Timestamp(int64_t microSecondsSinceEpochArg)
     : microSecondsSinceEpoch_(microSecondsSinceEpochArg)
   {
   }
-
+  /// 交换两个对象，其实是交换内部microSecondsSinceEpoch_成员
   void swap(Timestamp& that)
   {
     std::swap(microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
@@ -57,11 +56,12 @@ class Timestamp : public muduo::copyable,
 
   string toString() const;
   string toFormattedString(bool showMicroseconds = true) const;
-
+  /// 有效的时间戳
   bool valid() const { return microSecondsSinceEpoch_ > 0; }
 
   // for internal usage.
   int64_t microSecondsSinceEpoch() const { return microSecondsSinceEpoch_; }
+  /// 转换成秒
   time_t secondsSinceEpoch() const
   { return static_cast<time_t>(microSecondsSinceEpoch_ / kMicroSecondsPerSecond); }
 
@@ -90,6 +90,7 @@ class Timestamp : public muduo::copyable,
   int64_t microSecondsSinceEpoch_;
 };
 
+/// operator比较操作符
 inline bool operator<(Timestamp lhs, Timestamp rhs)
 {
   return lhs.microSecondsSinceEpoch() < rhs.microSecondsSinceEpoch();
@@ -107,6 +108,7 @@ inline bool operator==(Timestamp lhs, Timestamp rhs)
 /// @return (high-low) in seconds
 /// @c double has 52-bit precision, enough for one-microsecond
 /// resolution for next 100 years.
+/// 时间差, 单位为秒
 inline double timeDifference(Timestamp high, Timestamp low)
 {
   int64_t diff = high.microSecondsSinceEpoch() - low.microSecondsSinceEpoch();
@@ -117,7 +119,7 @@ inline double timeDifference(Timestamp high, Timestamp low)
 /// Add @c seconds to given timestamp.
 ///
 /// @return timestamp+seconds as Timestamp
-///
+/// 当前时间戳, 增加多少秒
 inline Timestamp addTime(Timestamp timestamp, double seconds)
 {
   int64_t delta = static_cast<int64_t>(seconds * Timestamp::kMicroSecondsPerSecond);

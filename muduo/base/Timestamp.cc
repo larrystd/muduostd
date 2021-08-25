@@ -19,7 +19,7 @@ using namespace muduo;
 static_assert(sizeof(Timestamp) == sizeof(int64_t),
               "Timestamp should be same size as int64_t");
 
-
+/// 时间戳输出, 形式**秒,**微秒
 string Timestamp::toString() const {
   char buf[32] = {0};
   int64_t seconds = microSecondsSinceEpoch_ / kMicroSecondsPerSecond;
@@ -28,6 +28,7 @@ string Timestamp::toString() const {
   return buf;
 }
 
+/// 格式化字符串
 string Timestamp::toFormattedString(bool showMicroseconds) const
 {
   char buf[64] = {0};
@@ -52,9 +53,11 @@ string Timestamp::toFormattedString(bool showMicroseconds) const
   return buf;
 }
 
+/// 当前时间时间戳
 Timestamp Timestamp::now()
 {
   struct timeval tv;
+  /// 当前时间
   gettimeofday(&tv, NULL);
   int64_t seconds = tv.tv_sec;
   return Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);

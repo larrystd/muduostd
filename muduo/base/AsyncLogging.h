@@ -58,6 +58,8 @@ class AsyncLogging : noncopyable
   void threadFunc();
 
   typedef muduo::detail::FixedBuffer<muduo::detail::kLargeBuffer> Buffer;
+
+  /// 用unique_ptr维护的Buffer vector
   typedef std::vector<std::unique_ptr<Buffer>> BufferVector;
   typedef BufferVector::value_type BufferPtr;
 
@@ -69,6 +71,8 @@ class AsyncLogging : noncopyable
   muduo::CountDownLatch latch_;
   muduo::MutexLock mutex_;
   muduo::Condition cond_ GUARDED_BY(mutex_);
+
+  /// 有三个buffer, currentBuffer当前使用的buffer, buffers_是要写的buffer
   BufferPtr currentBuffer_ GUARDED_BY(mutex_);
   BufferPtr nextBuffer_ GUARDED_BY(mutex_);
   BufferVector buffers_ GUARDED_BY(mutex_);

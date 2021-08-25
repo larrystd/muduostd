@@ -134,6 +134,8 @@ void AsyncLogging::threadFunc()
     buffersToWrite.clear();
     output.flush();
   }
+
+  /// 刷新到文件中
   output.flush();
 }
 

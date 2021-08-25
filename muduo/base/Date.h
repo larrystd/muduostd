@@ -25,7 +25,7 @@ class Date : public muduo::copyable
           // public boost::equality_comparable<Date>
 {
  public:
-
+  /// 日期 年月日
   struct YearMonthDay
   {
     int year; // [1900..2500]
@@ -51,6 +51,7 @@ class Date : public muduo::copyable
 
   ///
   /// Constucts a Date from Julian Day Number.
+  /// 直接通过Julian Day Number构造类
   ///
   explicit Date(int julianDayNum)
     : julianDayNumber_(julianDayNum)
@@ -101,6 +102,7 @@ class Date : public muduo::copyable
   int julianDayNumber() const { return julianDayNumber_; }
 
  private:
+ /// 日期number
   int julianDayNumber_;
 };
 

@@ -43,6 +43,7 @@ const char digitsHex[] = "0123456789ABCDEF";
 static_assert(sizeof digitsHex == 17, "wrong number of digitsHex");
 
 // Efficient Integer to String Conversions, by Matthew Wilson.
+/// 
 template<typename T>
 size_t convert(char buf[], T value)
 {
@@ -51,19 +52,21 @@ size_t convert(char buf[], T value)
 
   do
   {
-    int lsd = static_cast<int>(i % 10);
+    int lsd = static_cast<int>(i % 10); /// 最后一位数字
     i /= 10;
-    *p++ = zero[lsd];
+    *p++ = zero[lsd];   // *p = zero[lsd]; p++;
   } while (i != 0);
 
   if (value < 0)
   {
-    *p++ = '-';
+    *p++ = '-'; // 负号标识
   }
   *p = '\0';
+
+  /// 反转
   std::reverse(buf, p);
 
-  return p - buf;
+  return p - buf; // size
 }
 
 size_t convertHex(char buf[], uintptr_t value)
@@ -233,16 +236,21 @@ void LogStream::staticCheck()
                 "kMaxNumericSize is large enough");
 }
 
+/// 输出流缓冲
 template<typename T>
 void LogStream::formatInteger(T v)
 {
   if (buffer_.avail() >= kMaxNumericSize)
   {
+    // 将T v 转为字符指针buffer_
     size_t len = convert(buffer_.current(), v);
+
+    /// len区域已经输出, 指针右移
     buffer_.add(len);
   }
 }
 
+/// 输出的类型重载
 LogStream& LogStream::operator<<(short v)
 {
   *this << static_cast<int>(v);
@@ -269,8 +277,8 @@ LogStream& LogStream::operator<<(unsigned int v)
 
 LogStream& LogStream::operator<<(long v)
 {
-  formatInteger(v);
-  return *this;
+  formatInteger(v); // v进入缓冲区
+  return *this;   // 返回LogStream
 }
 
 LogStream& LogStream::operator<<(unsigned long v)
@@ -311,6 +319,7 @@ LogStream& LogStream::operator<<(double v)
   if (buffer_.avail() >= kMaxNumericSize)
   {
     int len = snprintf(buffer_.current(), kMaxNumericSize, "%.12g", v);
+    /// buffer_
     buffer_.add(len);
   }
   return *this;

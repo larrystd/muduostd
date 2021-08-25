@@ -29,7 +29,9 @@ class WeakCallback
 
   void operator()(ARGS&&... args) const
   {
+    /// 转成shared_ptr, 判断对象是否存活
     std::shared_ptr<CLASS> ptr(object_.lock());
+    /// 如果存活, 执行function
     if (ptr)
     {
       function_(ptr.get(), std::forward<ARGS>(args)...);
@@ -41,7 +43,7 @@ class WeakCallback
   }
 
  private:
-
+  /// 维护一个weak_ptr的对象, 一个函数对象std::function<>
   std::weak_ptr<CLASS> object_;
   std::function<void (CLASS*, ARGS...)> function_;
 };

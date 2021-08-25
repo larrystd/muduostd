@@ -23,6 +23,7 @@ class BoundedBlockingQueue : noncopyable
     : mutex_(),
       notEmpty_(mutex_),
       notFull_(mutex_),
+      /// 设置队列最大size
       queue_(maxSize)
   {
   }
@@ -30,6 +31,7 @@ class BoundedBlockingQueue : noncopyable
   void put(const T& x)
   {
     MutexLockGuard lock(mutex_);
+    ///等待队列不满
     while (queue_.full())
     {
       notFull_.wait();
@@ -54,6 +56,7 @@ class BoundedBlockingQueue : noncopyable
   T take()
   {
     MutexLockGuard lock(mutex_);
+    /// 等待队列非空
     while (queue_.empty())
     {
       notEmpty_.wait();

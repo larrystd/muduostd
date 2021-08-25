@@ -17,12 +17,15 @@ CountDownLatch::CountDownLatch(int count)
 void CountDownLatch::wait()
 {
   MutexLockGuard lock(mutex_);
+
+  /// 一直等待到count_==0
   while (count_ > 0)
   {
     condition_.wait();
   }
 }
 
+/// 倒计时减1, 需要锁
 void CountDownLatch::countDown()
 {
   MutexLockGuard lock(mutex_);

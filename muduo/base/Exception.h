@@ -32,6 +32,8 @@ class Exception : public std::exception
 
  private:
   string message_;
+
+  /// 异常情况
   string stack_;
 };
 

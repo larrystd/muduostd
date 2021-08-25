@@ -35,6 +35,8 @@ LogFile::LogFile(const string& basename,
 
 LogFile::~LogFile() = default;
 
+
+/// 
 void LogFile::append(const char* logline, int len)
 {
   if (mutex_)
@@ -52,6 +54,7 @@ void LogFile::flush()
 {
   if (mutex_)
   {
+    /// 将缓冲区内的数据写回file_中fp_指定的文件中
     MutexLockGuard lock(*mutex_);
     file_->flush();
   }
@@ -63,6 +66,7 @@ void LogFile::flush()
 
 void LogFile::append_unlocked(const char* logline, int len)
 {
+  /// 在缓冲区中添加数据
   file_->append(logline, len);
 
   if (file_->writtenBytes() > rollSize_)
@@ -107,6 +111,7 @@ bool LogFile::rollFile()
   return false;
 }
 
+/// 生成logfile的名字
 string LogFile::getLogFileName(const string& basename, time_t* now)
 {
   string filename;

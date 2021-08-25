@@ -11,6 +11,7 @@ namespace muduo
 
 Exception::Exception(string msg)
   : message_(std::move(msg)),
+  /// 异常
     stack_(CurrentThread::stackTrace(/*demangle=*/false))
 {
 }

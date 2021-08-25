@@ -17,10 +17,11 @@ namespace muduo
 
 namespace detail
 {
-
+/// 缓冲区大小
 const int kSmallBuffer = 4000;
 const int kLargeBuffer = 4000*1000;
 
+/// 缓冲区类
 template<int SIZE>
 class FixedBuffer : noncopyable
 {
@@ -36,24 +37,30 @@ class FixedBuffer : noncopyable
     setCookie(cookieEnd);
   }
 
+  /// 在char* cur指针处加入数据
   void append(const char* /*restrict*/ buf, size_t len)
   {
     // FIXME: append partially
     if (implicit_cast<size_t>(avail()) > len)
     {
+      /// 把buf拷贝到cur指针处
       memcpy(cur_, buf, len);
       cur_ += len;
     }
   }
 
   const char* data() const { return data_; }
+  // 缓冲的长度
   int length() const { return static_cast<int>(cur_ - data_); }
 
   // write to data_ directly
+  /// 当前输出位置指针
   char* current() { return cur_; }
+  /// 可用的字节大小
   int avail() const { return static_cast<int>(end() - cur_); }
+  /// 区域已使用(输出)cur右移
   void add(size_t len) { cur_ += len; }
-
+  // 重置cur_指针
   void reset() { cur_ = data_; }
   void bzero() { memZero(data_, sizeof data_); }
 
@@ -71,18 +78,22 @@ class FixedBuffer : noncopyable
   static void cookieEnd();
 
   void (*cookie_)();
+
+  /// 缓冲区
   char data_[SIZE];
   char* cur_;
 };
 
 }  // namespace detail
 
+/// 日志流
 class LogStream : noncopyable
 {
   typedef LogStream self;
  public:
   typedef detail::FixedBuffer<detail::kSmallBuffer> Buffer;
 
+  /// 输出流重载
   self& operator<<(bool v)
   {
     buffer_.append(v ? "1" : "0", 1);
@@ -141,6 +152,7 @@ class LogStream : noncopyable
     return *this;
   }
 
+  /// 将StringPiece& v放入stream的缓冲区中
   self& operator<<(const StringPiece& v)
   {
     buffer_.append(v.data(), v.size());
@@ -162,9 +174,9 @@ class LogStream : noncopyable
 
   template<typename T>
   void formatInteger(T);
-
+  /// 输入输出日志流的缓冲区
   Buffer buffer_;
-
+  /// 设置的最大数值字节
   static const int kMaxNumericSize = 32;
 };
 

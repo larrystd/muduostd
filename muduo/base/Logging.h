@@ -17,6 +17,8 @@ class TimeZone;
 class Logger
 {
  public:
+
+ /// 日志层级
   enum LogLevel
   {
     TRACE,
@@ -30,6 +32,7 @@ class Logger
 
   // compile time calculation of basename of source file
   // 两种构造方法，(1)通过传入数组的引用  (2)通过const char*
+  // 存储文件名和长度
   class SourceFile
   {
    public:
@@ -41,7 +44,7 @@ class Logger
       const char* slash = strrchr(data_, '/'); // builtin function, Returns a pointer to the last occurrence of character in the C string str.
       if (slash)
       {
-        data_ = slash + 1;  // 文件名
+        data_ = slash + 1;  // 文件名的指针
         size_ -= static_cast<int>(data_ - arr);
       }
     }
@@ -68,11 +71,13 @@ class Logger
   Logger(SourceFile file, int line, bool toAbort);
   ~Logger();
 
+  /// 返回Logger的流对象
   LogStream& stream() { return impl_.stream_; }
 
   static LogLevel logLevel();
   static void setLogLevel(LogLevel level);
 
+  /// 函数指针类型
   typedef void (*OutputFunc)(const char* msg, int len);
   typedef void (*FlushFunc)();
   static void setOutput(OutputFunc);
@@ -84,15 +89,20 @@ class Logger
 class Impl
 {
  public:
+  /// LogLevel
   typedef Logger::LogLevel LogLevel;
   Impl(LogLevel level, int old_errno, const SourceFile& file, int line);
   void formatTime();
   void finish();
 
+  /// 时间戳
   Timestamp time_;
+  /// LogStream类
   LogStream stream_;
+  /// 日志level
   LogLevel level_;
   int line_;
+  /// 日志名
   SourceFile basename_;
 };
 
@@ -123,6 +133,9 @@ inline Logger::LogLevel Logger::logLevel()
 //   else
 //     logWarnStream << "Bad news";
 //
+
+
+/// 定义 LOG_WARN等定义, 返回stream对象
 #define LOG_TRACE if (muduo::Logger::logLevel() <= muduo::Logger::TRACE) \
   muduo::Logger(__FILE__, __LINE__, muduo::Logger::TRACE, __func__).stream()
 #define LOG_DEBUG if (muduo::Logger::logLevel() <= muduo::Logger::DEBUG) \

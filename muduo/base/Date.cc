@@ -18,6 +18,7 @@ char require_32_bit_integer_at_least[sizeof(int) >= sizeof(int32_t) ? 1 : -1];
 // http://www.faqs.org/faqs/calendars/faq/part2/
 // http://blog.csdn.net/Solstice
 
+/// YearMonthDay结构转为julianDayNumber
 int getJulianDayNumber(int year, int month, int day)
 {
   (void) require_32_bit_integer_at_least; // no warning please
@@ -27,6 +28,7 @@ int getJulianDayNumber(int year, int month, int day)
   return day + (153*m + 2) / 5 + y*365 + y/4 - y/100 + y/400 - 32045;
 }
 
+/// julianDayNumber转换为YearMonthDay结构
 struct Date::YearMonthDay getYearMonthDay(int julianDayNumber)
 {
   int a = julianDayNumber + 32044;
