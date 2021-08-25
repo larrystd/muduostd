@@ -112,7 +112,12 @@ EventLoop::~EventLoop()
   ::close(wakeupFd_);
   t_loopInThisThread = NULL;
 }
+
 // EventLoop的loop循环
+/// loop是针对服务器的, 需要处理大量客户端的处理的回调函数。执行loop管理线程需要one thread one loop, 但执行这些回调函数是可以多线程的
+
+/// 会有个线程池执行大量eventloop, 同时这些线程可以执行任务队列的函数
+
 void EventLoop::loop()
 {
   assert(!looping_);
@@ -142,6 +147,7 @@ void EventLoop::loop()
     for (Channel* channel : activeChannels_)
     {
       currentActiveChannel_ = channel;
+      /// 处理handleEvent函数
       currentActiveChannel_->handleEvent(pollReturnTime_); 
     }
     // 清空ActiveChannel_
@@ -152,7 +158,7 @@ void EventLoop::loop()
     /// 注意如果此时该EventLoop中迟迟没有事件触发，那么epoll_wait一直就会阻塞。 这样会导致，pendingFunctors_迟迟不能被执行了。
     /// 这时候需要唤醒epoll_wait，随机触发一个事件让poller_->poll解除阻塞
 
-    /// (可能有问题, 执行doPendingFunctors出现错误或者阻塞, loop直接崩掉)
+    /// 待执行的任务队列
     doPendingFunctors();
   }
 
@@ -164,7 +170,8 @@ void EventLoop::loop()
 void EventLoop::quit()
 {
   quit_ = true;
-  // 当前线程不是创建eventloop的线程
+  // 当前的线程不是创建eventloop对象的线程, 需要等待
+  // 创建eventloop对象的线程负责销毁它
   if (!isInLoopThread())
   {
     wakeup();
@@ -173,8 +180,8 @@ void EventLoop::quit()
 
 void EventLoop::runInLoop(Functor cb)
 {
-  /// 必须在创建eventloop的线程中执行cb函数, 保证线程执行过程中不会发生竞态
-  /// 线程，对象, 线程创建eventloop同时获取当前thread_id, 若匹配说明该线程创建过eventloop
+  /// 创建eventloop的线程中执行cb函数, 保证始终只有一个线程执行该函数, 是创建该eventloop对象的线程
+  /// 
   if (isInLoopThread())
   {
     cb();
@@ -182,7 +189,7 @@ void EventLoop::runInLoop(Functor cb)
   else
 
   {
-    ///先入队列，等eventloop线程自动调用之
+    ///任务先入队列，等eventloop线程自动调用之
     queueInLoop(std::move(cb));
   }
 }
@@ -299,6 +306,7 @@ void EventLoop::handleRead()
 /// 运行等待的函数
 void EventLoop::doPendingFunctors()
 {
+  /// 新建一个functor
   std::vector<Functor> functors;
   /// 需要唤醒epoll_wait了
   callingPendingFunctors_ = true;

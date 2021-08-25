@@ -35,11 +35,14 @@ class EventLoopThread : noncopyable
   EventLoopThread(const ThreadInitCallback& cb = ThreadInitCallback(),
                   const string& name = string());
   ~EventLoopThread();
+
+  /// EventloopThread的startLoop()
   EventLoop* startLoop();
 
  private:
   void threadFunc();
 
+  /// 线程内部的loop对象
   EventLoop* loop_ GUARDED_BY(mutex_);
   bool exiting_;
   // 新thread创建

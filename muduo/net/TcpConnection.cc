@@ -106,6 +106,7 @@ void TcpConnection::send(const StringPiece& message)
     }
     else
     {
+      /// 函数指针, 指向&TcpConnection::sendInLoop;
       void (TcpConnection::*fp)(const StringPiece& message) = &TcpConnection::sendInLoop;
       /// 保证在创建eventloop的线程中运行
       loop_->runInLoop(
@@ -148,6 +149,7 @@ void TcpConnection::sendInLoop(const StringPiece& message)
 }
 
 /// send格式为*data c语言指针形式
+/// 发送数据, 核心是调用sockets::write
 void TcpConnection::sendInLoop(const void* data, size_t len)
 {
   loop_->assertInLoopThread();

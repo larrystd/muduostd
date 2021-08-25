@@ -66,7 +66,7 @@ void TcpServer::start()
 
     assert(!acceptor_->listening());
 
-    /// 在eventloop进程中运行listen监听
+    /// 在eventloop进程(即主线程)中运行listen监听
     /// 
     loop_->runInLoop(
         std::bind(&Acceptor::listen, get_pointer(acceptor_)));
@@ -77,7 +77,10 @@ void TcpServer::start()
 void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
 {
   loop_->assertInLoopThread();
-  /// 下一个eventloop
+  /// 来了一个连接, 分配一个固定eventloop thread处理之
+  /// 连接绑定eventloop, eventloop绑定thread, 因此连接绑定了thread
+  /// 这样就不会线程静态了, 因为固定的连接由固定的线程处理
+  /// 主线程的作用只是刚开始建立连接，以后的处理通话等由特定的工作线程进行
   EventLoop* ioLoop = threadPool_->getNextLoop();
   char buf[64];
   snprintf(buf, sizeof buf, "-%s#%d", ipPort_.c_str(), nextConnId_);

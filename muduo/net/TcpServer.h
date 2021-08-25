@@ -65,6 +65,7 @@ class TcpServer : noncopyable
   void setThreadInitCallback(const ThreadInitCallback& cb)
   { threadInitCallback_ = cb; }
   /// valid after calling start()
+  /// EventLoopThreadPool
   std::shared_ptr<EventLoopThreadPool> threadPool()
   { return threadPool_; }
 
@@ -114,6 +115,7 @@ class TcpServer : noncopyable
   AtomicInt32 started_;
   // always in loop thread
   int nextConnId_;
+
   ConnectionMap connections_;
 };
 

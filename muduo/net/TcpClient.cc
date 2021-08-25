@@ -136,6 +136,7 @@ void TcpClient::stop()
 /// 封装连接
 void TcpClient::newConnection(int sockfd)
 {
+  /// 在IO线程中执行之
   loop_->assertInLoopThread();
   InetAddress peerAddr(sockets::getPeerAddr(sockfd));
   char buf[32];
@@ -151,7 +152,7 @@ void TcpClient::newConnection(int sockfd)
                                           sockfd,
                                           localAddr,
                                           peerAddr));
-
+  /// 设置回调函数
   conn->setConnectionCallback(connectionCallback_);
   conn->setMessageCallback(messageCallback_);
   conn->setWriteCompleteCallback(writeCompleteCallback_);

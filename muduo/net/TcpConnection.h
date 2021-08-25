@@ -144,6 +144,7 @@ class TcpConnection : noncopyable,
   void startReadInLoop();
   void stopReadInLoop();
 
+  /// TcpConnection的loop
   EventLoop* loop_;
   const string name_;
   StateE state_;  // FIXME: use atomic variable

@@ -65,6 +65,7 @@ void Channel::remove()
   loop_->removeChannel(this);
 }
 
+
 void Channel::handleEvent(Timestamp receiveTime)
 {
   std::shared_ptr<void> guard;

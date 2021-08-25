@@ -60,7 +60,7 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
   }
 }
 
-/// loop 是一个List, 得到下一个loop
+/// loop 是一个vector, 得到下一个loop
 EventLoop* EventLoopThreadPool::getNextLoop()
 {
   baseLoop_->assertInLoopThread();

@@ -83,6 +83,8 @@ class TcpClient : noncopyable
   // always in loop thread
   int nextConnId_;
   mutable MutexLock mutex_;
+
+  /// 封装connection
   TcpConnectionPtr connection_ GUARDED_BY(mutex_);
 };
 
