@@ -20,7 +20,8 @@ FileUtil::AppendFile::AppendFile(StringArg filename)
   : fp_(::fopen(filename.c_str(), "ae")),  // 'e' for O_CLOEXEC
     writtenBytes_(0)
 {
-  /// 设置文件缓冲区
+  /// 设置文件流的缓冲区
+  /// fp与缓冲区关联
   assert(fp_);
   ::setbuffer(fp_, buffer_, sizeof buffer_);
   // posix_fadvise POSIX_FADV_DONTNEED ?
@@ -59,7 +60,7 @@ void FileUtil::AppendFile::append(const char* logline, const size_t len)
 
 void FileUtil::AppendFile::flush()
 {
-  /// 强迫将缓冲区内的数据写回fp_指定的文件中
+  /// 将fp关联的缓冲区内的数据写回fp_指定的文件中
   ::fflush(fp_);
 }
 
@@ -73,6 +74,8 @@ size_t FileUtil::AppendFile::write(const char* logline, size_t len)
   // count	-	要被写入的对象数
   // stream	-	指向输出流的指针
   // 但会写入的对象数, 也就是len
+
+  /// 事实上写入文件流的缓冲区
   return ::fwrite_unlocked(logline, 1, len, fp_);
 }
 

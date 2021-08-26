@@ -18,7 +18,7 @@
 
 namespace muduo
 {
-
+/// 异步日志
 class AsyncLogging : noncopyable
 {
  public:
@@ -62,10 +62,11 @@ class AsyncLogging : noncopyable
   /// 用unique_ptr维护的Buffer vector
   typedef std::vector<std::unique_ptr<Buffer>> BufferVector;
   typedef BufferVector::value_type BufferPtr;
-
+  /// 定期flushInterval
   const int flushInterval_;
   std::atomic<bool> running_;
   const string basename_;
+  /// 滚动日志
   const off_t rollSize_;
   muduo::Thread thread_;
   muduo::CountDownLatch latch_;
@@ -75,6 +76,8 @@ class AsyncLogging : noncopyable
   /// 有三个buffer, currentBuffer当前使用的buffer, buffers_是要写的buffer
   BufferPtr currentBuffer_ GUARDED_BY(mutex_);
   BufferPtr nextBuffer_ GUARDED_BY(mutex_);
+
+  /// buffers是一个Buffer vector
   BufferVector buffers_ GUARDED_BY(mutex_);
 };
 

@@ -36,6 +36,7 @@ class Logger
   class SourceFile
   {
    public:
+   /// 
     template<int N>
     SourceFile(const char (&arr)[N])
       : data_(arr),
@@ -80,12 +81,14 @@ class Logger
   /// 函数指针类型
   typedef void (*OutputFunc)(const char* msg, int len);
   typedef void (*FlushFunc)();
+
   static void setOutput(OutputFunc);
   static void setFlush(FlushFunc);
   static void setTimeZone(const TimeZone& tz);
 
  private:
 
+/// Logging内部的实现类
 class Impl
 {
  public:
