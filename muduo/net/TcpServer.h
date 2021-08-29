@@ -41,6 +41,7 @@ class TcpServer : noncopyable
   };
 
   //TcpServer(EventLoop* loop, const InetAddress& listenAddr);
+  /// 用loop对象和IP地址构造
   TcpServer(EventLoop* loop,
             const InetAddress& listenAddr,
             const string& nameArg,
@@ -74,7 +75,7 @@ class TcpServer : noncopyable
   /// It's harmless to call it multiple times.
   /// Thread safe.
   void start();
-  /// 设置回调函数
+  /// 手动设置回调函数
   /// Set connection callback.
   /// Not thread safe.
   void setConnectionCallback(const ConnectionCallback& cb)
@@ -107,6 +108,7 @@ class TcpServer : noncopyable
 
   std::unique_ptr<Acceptor> acceptor_; // avoid revealing Acceptor
   std::shared_ptr<EventLoopThreadPool> threadPool_;
+
   /// 回调函数
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
@@ -115,7 +117,7 @@ class TcpServer : noncopyable
   AtomicInt32 started_;
   // always in loop thread
   int nextConnId_;
-
+  /// map维护的connections
   ConnectionMap connections_;
 };
 

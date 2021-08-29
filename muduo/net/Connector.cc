@@ -37,7 +37,7 @@ Connector::~Connector()
   assert(!channel_);
 }
 
-/// 在io线程中执行startInloop函数
+/// 在loop线程中执行startInloop函数
 void Connector::start()
 {
   connect_ = true;  /// 先设置true, 没连接上可以重试，一直没连接上设置为false
@@ -84,7 +84,7 @@ void Connector::connect()
 {
   /// 创建sockfd(新建)
   int sockfd = sockets::createNonblockingOrDie(serverAddr_.family());
-  /// 连接地址
+  /// 连接地址, 返回状态码
   int ret = sockets::connect(sockfd, serverAddr_.getSockAddr());
   int savedErrno = (ret == 0) ? 0 : errno;
   /// 注意socket是一次性的，一旦发生错误就不可恢复，只能关闭重来
@@ -141,8 +141,9 @@ void Connector::connecting(int sockfd)
 {
   setState(kConnecting);
   assert(!channel_);
+  /// 将loop, sockfd封装成channel
   channel_.reset(new Channel(loop_, sockfd));
-
+  /// 设置回调函数
   channel_->setWriteCallback(
       std::bind(&Connector::handleWrite, this)); // FIXME: unsafe
   channel_->setErrorCallback(
@@ -150,6 +151,7 @@ void Connector::connecting(int sockfd)
 
   // channel_->tie(shared_from_this()); is not working,
   // as channel_ is not managed by shared_ptr
+  // 设置channel可读
   channel_->enableWriting();
 }
 

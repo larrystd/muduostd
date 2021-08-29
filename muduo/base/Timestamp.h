@@ -34,6 +34,7 @@ class Timestamp : public muduo::copyable,
   ///
   /// Constucts an invalid Timestamp.
   /// 时间戳的构造器
+  /// 构造一个无效时间戳
   Timestamp()
     : microSecondsSinceEpoch_(0)
   {
@@ -68,6 +69,7 @@ class Timestamp : public muduo::copyable,
   ///
   /// Get time of now.
   ///
+  /// 当前时间戳
   static Timestamp now();
   static Timestamp invalid()
   {

@@ -45,6 +45,7 @@ class EventLoopThread : noncopyable
   /// 线程内部的loop对象
   EventLoop* loop_ GUARDED_BY(mutex_);
   bool exiting_;
+  
   // 新thread创建
   Thread thread_;
   MutexLock mutex_;

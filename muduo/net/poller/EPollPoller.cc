@@ -58,12 +58,11 @@ EPollPoller::~EPollPoller()
   ::close(epollfd_);
 }
 
-/// poll
+/// poll返回活跃的channel
 Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
 {
   LOG_TRACE << "fd total count " << channels_.size();
-  /// 调用epoll_wait获取活跃的events_
-
+  /// 调用epoll_wait从获取活跃的事件存储到events_中
   int numEvents = ::epoll_wait(epollfd_,
                                &*events_.begin(),
                                static_cast<int>(events_.size()),
@@ -73,7 +72,7 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
   if (numEvents > 0)
   {
     LOG_TRACE << numEvents << " events happened";
-    /// 添加到activeChannels中
+    /// 将活跃事件添加到activeChannels中
     fillActiveChannels(numEvents, activeChannels);
     if (implicit_cast<size_t>(numEvents) == events_.size())
     {
@@ -104,21 +103,24 @@ void EPollPoller::fillActiveChannels(int numEvents,
   assert(implicit_cast<size_t>(numEvents) <= events_.size());
   for (int i = 0; i < numEvents; ++i)
   {
-    /// 转型
+    /// 转型events_[i].data.ptr指针转为channel指针
     Channel* channel = static_cast<Channel*>(events_[i].data.ptr);
 #ifndef NDEBUG
+    /// fd
     int fd = channel->fd();
     /// 在channels_中查找活跃的fd key
     ChannelMap::const_iterator it = channels_.find(fd);
     assert(it != channels_.end());
     assert(it->second == channel);
 #endif
+  /// events是epoll注册的事件
     channel->set_revents(events_[i].events);
     activeChannels->push_back(channel);
   }
 }
 
-/// 用新的channel更新, 在channelmap中设置关联
+/// 更新channel, 也就是调用update更新fd监听的事件
+/// fd和events构成了监听对象
 void EPollPoller::updateChannel(Channel* channel)
 {
   Poller::assertInLoopThread();
@@ -191,11 +193,14 @@ void EPollPoller::removeChannel(Channel* channel)
   channel->set_index(kNew);
 }
 
-/// 更新poll的fd， 在epoll中注册channel的fd
+/// 更新poll的fd, ::epoll_ctl更新fd_的事件
 void EPollPoller::update(int operation, Channel* channel)
 {
+  /// epoll_event 类型
   struct epoll_event event;
   memZero(&event, sizeof event);
+
+  /// 事件元素, 设置event.events, event.data.ptr
   event.events = channel->events();
   event.data.ptr = channel;
   int fd = channel->fd();

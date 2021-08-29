@@ -30,7 +30,7 @@ class InetAddress;
 class Acceptor : noncopyable
 {
  public:
- /// 服务端的连接回调函数
+  /// 服务端的连接回调函数
   typedef std::function<void (int sockfd, const InetAddress&)> NewConnectionCallback;
 
   Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
@@ -39,7 +39,8 @@ class Acceptor : noncopyable
   /// 设置连接回调函数, 对于服务端, 接受连接之后封装连接为connection
   void setNewConnectionCallback(const NewConnectionCallback& cb)
   { newConnectionCallback_ = cb; }
-  /// 监听客户端连接
+
+  /// 监听连接
   void listen();
 
   bool listening() const { return listening_; }
@@ -47,8 +48,11 @@ class Acceptor : noncopyable
  private:
   void handleRead();
 
+  /// 服务端具有的eventloop, 一般用来监听连接
   EventLoop* loop_;
+  /// socket
   Socket acceptSocket_;
+  /// channel
   Channel acceptChannel_;
   NewConnectionCallback newConnectionCallback_;
   bool listening_;

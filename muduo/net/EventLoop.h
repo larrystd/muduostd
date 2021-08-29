@@ -82,7 +82,7 @@ class EventLoop : noncopyable
 
   size_t queueSize() const;
 
-  // timers
+  // timers, 设置定时器任务
 
   ///
   /// Runs callback at 'time'.
@@ -155,15 +155,19 @@ class EventLoop : noncopyable
   bool callingPendingFunctors_; /* atomic */
   // 迭代次数
   int64_t iteration_;
+  /// tid
   const pid_t threadId_;
   // pollReturnTime_ 时间戳
   Timestamp pollReturnTime_;
+  /// poller和时间队列
   std::unique_ptr<Poller> poller_;
   std::unique_ptr<TimerQueue> timerQueue_;
+
   int wakeupFd_;
   // unlike in TimerQueue, which is an internal class,
   // we don't expose Channel to client.
   std::unique_ptr<Channel> wakeupChannel_;
+
   boost::any context_;
 
   // scratch variables
@@ -171,6 +175,7 @@ class EventLoop : noncopyable
   Channel* currentActiveChannel_;
 
   mutable MutexLock mutex_;
+  /// 任务队列
   std::vector<Functor> pendingFunctors_ GUARDED_BY(mutex_);
 };
 

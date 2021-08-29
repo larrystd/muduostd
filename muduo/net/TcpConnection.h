@@ -98,12 +98,13 @@ class TcpConnection : noncopyable,
   { return &context_; }
   
   // 设置回调函数
+  /// 连接回调函数
   void setConnectionCallback(const ConnectionCallback& cb)
   { connectionCallback_ = cb; }
-
+  /// 信息回调函数
   void setMessageCallback(const MessageCallback& cb)
   { messageCallback_ = cb; }
-
+  /// 写毕回调函数
   void setWriteCompleteCallback(const WriteCompleteCallback& cb)
   { writeCompleteCallback_ = cb; }
 
@@ -129,6 +130,8 @@ class TcpConnection : noncopyable,
 
  private:
   enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
+
+  /// 处理函数
   void handleRead(Timestamp receiveTime);
   void handleWrite();
   void handleClose();
@@ -150,19 +153,25 @@ class TcpConnection : noncopyable,
   StateE state_;  // FIXME: use atomic variable
   bool reading_;
   // we don't expose those classes to client.
+  /// socket和channel
   std::unique_ptr<Socket> socket_;
   std::unique_ptr<Channel> channel_;
+  // IP地址
   const InetAddress localAddr_;
   const InetAddress peerAddr_;
+  
   /// 回调函数
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
+  /// 写毕回调函数
   WriteCompleteCallback writeCompleteCallback_;
   HighWaterMarkCallback highWaterMarkCallback_;
   CloseCallback closeCallback_;
   size_t highWaterMark_;
 
   /// 缓冲区
+  // inputBuffer, client写, server读
+  /// outputBuffer server写, client读
   Buffer inputBuffer_;
   Buffer outputBuffer_; // FIXME: use list<Buffer> as output buffer.
   boost::any context_;

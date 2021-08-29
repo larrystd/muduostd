@@ -64,7 +64,7 @@ TcpClient::TcpClient(EventLoop* loop,
     connect_(true),
     nextConnId_(1)
 {
-  /// 连接后回调函数
+  /// 注册connector_连接后回调函数
   connector_->setNewConnectionCallback(
       std::bind(&TcpClient::newConnection, this, _1));
   // FIXME setConnectFailedCallback
@@ -136,7 +136,6 @@ void TcpClient::stop()
 /// 封装连接
 void TcpClient::newConnection(int sockfd)
 {
-  /// 在IO线程中执行之
   loop_->assertInLoopThread();
   InetAddress peerAddr(sockets::getPeerAddr(sockfd));
   char buf[32];
@@ -147,12 +146,13 @@ void TcpClient::newConnection(int sockfd)
   InetAddress localAddr(sockets::getLocalAddr(sockfd));
   // FIXME poll with zero timeout to double confirm the new connection
   // FIXME use make_shared if necessary
+  /// 创建一个TcpConnection对象
   TcpConnectionPtr conn(new TcpConnection(loop_,
                                           connName,
                                           sockfd,
                                           localAddr,
                                           peerAddr));
-  /// 设置回调函数
+  /// 设置TcpConnection的回调函数
   conn->setConnectionCallback(connectionCallback_);
   conn->setMessageCallback(messageCallback_);
   conn->setWriteCompleteCallback(writeCompleteCallback_);
@@ -163,7 +163,7 @@ void TcpClient::newConnection(int sockfd)
     connection_ = conn;
   }
 
-  /// 连接建立，注册fd
+  /// 连接建立，注册fd到loop_的poller
   conn->connectEstablished();
 }
 

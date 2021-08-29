@@ -26,7 +26,7 @@ using namespace muduo::net;
 /// (2) 设置服务端连接channel, 并设置可读回调函数。一旦监听到socket，可读，即调用回调函数
 Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport)
   : loop_(loop),
-  /// acceptSocket_
+  /// 创建一个监听socket 即acceptSocket_对象, 封装成acceptChannel_对象
     acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
     acceptChannel_(loop, acceptSocket_.fd()),
     listening_(false),
@@ -54,16 +54,16 @@ void Acceptor::listen()
   loop_->assertInLoopThread();
   listening_ = true;
   acceptSocket_.listen();
-  // 设置acceptChannel_服务端通道可读
+  // 设置acceptChannel_监听连接通道可读, 注册到loop的poller对象里
   acceptChannel_.enableReading(); 
 }
 
-/// 可读回调函数，建立连接
+/// 可读回调函数，建立连接。一旦poller到acceptChannel_活跃，会执行该回调函数
 void Acceptor::handleRead()
 {
   loop_->assertInLoopThread();
   InetAddress peerAddr;
-  //接受连接
+  //接受连接, 并得到一个connfd
   int connfd = acceptSocket_.accept(&peerAddr); // accept socket
   if (connfd >= 0)
   {
@@ -71,6 +71,8 @@ void Acceptor::handleRead()
     // LOG_TRACE << "Accepts of " << hostport;
     if (newConnectionCallback_)
     {
+
+      /// 得到connfd之后, 调用newConnectionCallback_处理connfd
       newConnectionCallback_(connfd, peerAddr);
     }
     else

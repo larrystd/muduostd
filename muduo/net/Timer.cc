@@ -17,10 +17,12 @@ void Timer::restart(Timestamp now)
 {
   if (repeat_)
   {
+    /// 重置超时时间, now+interval
     expiration_ = addTime(now, interval_);
   }
   else
   {
+    /// 无效时间戳
     expiration_ = Timestamp::invalid();
   }
 }

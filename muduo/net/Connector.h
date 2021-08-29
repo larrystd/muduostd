@@ -66,6 +66,7 @@ class Connector : noncopyable,
   int removeAndResetChannel();
   void resetChannel();
 
+  /// 主线程的loop, 用来处理建立的连接
   EventLoop* loop_;
   InetAddress serverAddr_;
   bool connect_; // atomic

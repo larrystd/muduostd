@@ -60,7 +60,9 @@ class Buffer : public muduo::copyable
   // swap Buffer rhs
   void swap(Buffer& rhs)
   {
+    /// 交换空间
     buffer_.swap(rhs.buffer_);
+    /// 交换索引
     std::swap(readerIndex_, rhs.readerIndex_);
     std::swap(writerIndex_, rhs.writerIndex_);
   }
@@ -76,6 +78,8 @@ class Buffer : public muduo::copyable
   // peek() 可读pos地址
   const char* peek() const
   { return begin() + readerIndex_; }
+
+  
   // 找CR LR \r或\n
   // 在可读区域寻找
   const char* findCRLF() const
@@ -171,11 +175,13 @@ class Buffer : public muduo::copyable
     retrieve(len);
     return result;
   }
+
   // 将可读区域封装成StringPiece返回
   StringPiece toStringPiece() const
   {
     return StringPiece(peek(), static_cast<int>(readableBytes()));
   }
+
   // 写数据，将data append()可写区域之后
   void append(const StringPiece& str)
   {
@@ -228,6 +234,7 @@ class Buffer : public muduo::copyable
   ///
   void appendInt64(int64_t x)
   {
+    /// 在添加数据前, 调用主机转网络字节序
     int64_t be64 = sockets::hostToNetwork64(x);
     append(&be64, sizeof be64);
   }
@@ -252,12 +259,14 @@ class Buffer : public muduo::copyable
     append(&x, sizeof x);
   }
 
-  /// 读数据，读取一个整数
+  /// 读数据，从readableBytes读取一个整数
   /// Read int64_t from network endian
   ///
   /// Require: buf->readableBytes() >= sizeof(int32_t)
+
   int64_t readInt64()
   {
+    /// 需要转字节序
     int64_t result = peekInt64();
     retrieveInt64();
     return result;
@@ -298,6 +307,7 @@ class Buffer : public muduo::copyable
     assert(readableBytes() >= sizeof(int64_t));
     int64_t be64 = 0;
     ::memcpy(&be64, peek(), sizeof be64);
+    //// 网络转主机字节
     return sockets::networkToHost64(be64);
   }
 
@@ -333,6 +343,7 @@ class Buffer : public muduo::copyable
   ///
   void prependInt64(int64_t x)
   {
+    /// x 转换字节序
     int64_t be64 = sockets::hostToNetwork64(x);
     prepend(&be64, sizeof be64);
   }
@@ -370,7 +381,9 @@ class Buffer : public muduo::copyable
   {
     Buffer other;
     other.ensureWritableBytes(readableBytes()+reserve);
+    /// 可读空间加入到other中
     other.append(toStringPiece());
+    /// 交换区域
     swap(other);
   }
   // 缓冲区全部容量
@@ -423,6 +436,8 @@ class Buffer : public muduo::copyable
  private:
  // 缓冲区用vector作为底层容器
   std::vector<char> buffer_;
+
+  /// 当前读写索引
   size_t readerIndex_;
   size_t writerIndex_;
 

@@ -22,6 +22,7 @@ namespace net
 
 ///
 /// Internal class for timer event.
+/// 定时事件对象
 ///
 class Timer : noncopyable
 {
@@ -31,6 +32,7 @@ class Timer : noncopyable
       expiration_(when),
       interval_(interval),
       repeat_(interval > 0.0),
+      /// 原子递增
       sequence_(s_numCreated_.incrementAndGet())
   { }
   /// 运行回调函数
@@ -48,7 +50,9 @@ class Timer : noncopyable
   static int64_t numCreated() { return s_numCreated_.get(); }
 
  private:
+ /// 定时任务
   const TimerCallback callback_;
+  /// 时间戳
   Timestamp expiration_;
   const double interval_;
   const bool repeat_;

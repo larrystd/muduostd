@@ -33,7 +33,13 @@ __thread EventLoop* t_loopInThisThread = 0;
 
 const int kPollTimeMs = 10000;
 
-/// eventfd创建
+/// eventfd
+// 在Linux系统中，eventfd是一个用来通知事件的文件描述符，timerfd是的定时器事件的文件描述符
+/// eventfd用来触发事件通知，timerfd用来触发将来的事件通知。
+
+// eventfd在内核里的核心是一个计数器counter，它是一个uint64_t的整形变量counter，初始值为initval。
+// read操作 如果当前counter > 0，那么read返回counter值，并重置counter为0；如果当前counter等于0，那么read 1)阻塞直到counter大于0
+// write操作 write尝试将value加到counter上。write可以多次连续调用，但read读一次即可清零
 int createEventfd()
 {
   int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -96,10 +102,10 @@ EventLoop::EventLoop()
     t_loopInThisThread = this;
   }
   /// eventloop会阻塞在epoll_wait, 被唤醒之后调用的回调函数
-  /// 唤醒会发送一个wakefd, 接收可读后执行回调函数
+  /// wakeupChannel_ 读的回调函数
   wakeupChannel_->setReadCallback(
       std::bind(&EventLoop::handleRead, this));
-  // wakeupfd注册之, 可读返回
+  // wakeupfd可读, 并调poller ->update中更新之
   wakeupChannel_->enableReading();
 }
 
@@ -243,11 +249,12 @@ void EventLoop::cancel(TimerId timerId)
 {
   return timerQueue_->cancel(timerId);
 }
-/// 更新channel,基于poller_修改fd, 被channel调用
+/// 更新此eventloop 监听的channel,基于poller_修改fd, 被channel调用
 void EventLoop::updateChannel(Channel* channel)
 {
   assert(channel->ownerLoop() == this);
   assertInLoopThread();
+
   poller_->updateChannel(channel);
 }
 
@@ -285,6 +292,7 @@ void EventLoop::abortNotInLoopThread()
 void EventLoop::wakeup()
 {
   uint64_t one = 1;
+  /// 使wakeupFd_可读
   ssize_t n = sockets::write(wakeupFd_, &one, sizeof one);
   if (n != sizeof one)
   {

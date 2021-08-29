@@ -26,6 +26,17 @@ namespace sockets
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+
+/// convert the byte encoding of integer values from the byte order that the current CPU (the "host") uses,
+
+/// 低序字节存储在起始地址，这称为小端（little-endian）字节序；另一种方法是将高序字节存储在起始地址，这称为大端（big-endian）字节序
+
+/// 网络字节序采用big endian排序方式。常见主机则是小端字节序
+
+/// 01111111 00000000 00000000 00000001 =   2130706433   （主机字节序）
+
+/// 00000001 00000000 00000000 01111111 =   16777343 （网络字节序）
+
 inline uint64_t hostToNetwork64(uint64_t host64)
 {
   return htobe64(host64);

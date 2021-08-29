@@ -35,7 +35,7 @@ EventLoopThreadPool::~EventLoopThreadPool()
 void EventLoopThreadPool::start(const ThreadInitCallback& cb)
 {
   assert(!started_);
-  /// 必须是创建过eventloop的线程
+  /// 当前loop创建线程, 也就是主线程
   baseLoop_->assertInLoopThread();
   // 开启线程池
   started_ = true;
@@ -46,11 +46,11 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
     char buf[name_.size() + 32];
     snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
 
-    // 构造EventLoopThread对象(同时创建了新线程)
+    // 构造EventLoopThread对象, 初始化thread对象执行函数
     EventLoopThread* t = new EventLoopThread(cb, buf);
     /// threads 列表
     threads_.push_back(std::unique_ptr<EventLoopThread>(t));
-    /// 开启新线程执行loop , 老线程返回loop, 加入列表
+    /// 创建新线程执行startLoop()函数,子线程创建loop对象并执行loop(), 主线程返回子线程的loop对象
     loops_.push_back(t->startLoop());
   }
   /// 不创建新线程， 当前线程执行cb
@@ -60,7 +60,7 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
   }
 }
 
-/// loop 是一个vector, 得到下一个loop
+/// loop 是一个vector, 得到下一个loop(每个子线程一个loop对象, 下一个loop每个loop都来自不同的线程)
 EventLoop* EventLoopThreadPool::getNextLoop()
 {
   baseLoop_->assertInLoopThread();

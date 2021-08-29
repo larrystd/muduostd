@@ -31,6 +31,7 @@ class TimerId;
 ///
 /// A best efforts timer queue.
 /// No guarantee that the callback will be on time.
+/// 定时器队列
 ///
 class TimerQueue : noncopyable
 {
@@ -43,6 +44,7 @@ class TimerQueue : noncopyable
   /// repeats if @c interval > 0.0.
   ///
   /// Must be thread safe. Usually be called from other threads.
+  /// 增加定时任务
   TimerId addTimer(TimerCallback cb,
                    Timestamp when,
                    double interval);
@@ -54,8 +56,14 @@ class TimerQueue : noncopyable
   // FIXME: use unique_ptr<Timer> instead of raw pointers.
   // This requires heterogeneous comparison lookup (N3465) from C++14
   // so that we can find an T* in a set<unique_ptr<T>>.
+  /// 时间戳和Timer对， Timer封装了定时任务和时间
+  /// 不用重载Timer operator<, 因为Timestamp是整型
   typedef std::pair<Timestamp, Timer*> Entry;
+  /// TimerList 集合
+  /// 使用集合, TimerList自然有序, 这里默认按照Timestamp从小到大排列
   typedef std::set<Entry> TimerList;
+  /// Timer* -id对, int64_t是一个原子递增类, 可以看作Timer的唯一标志
+  /// 指针也是整数, 直接比较地址
   typedef std::pair<Timer*, int64_t> ActiveTimer;
   typedef std::set<ActiveTimer> ActiveTimerSet;
 
@@ -64,14 +72,18 @@ class TimerQueue : noncopyable
   // called when timerfd alarms
   void handleRead();
   // move out all expired timers
+  /// 得到超期的定时事件
   std::vector<Entry> getExpired(Timestamp now);
   void reset(const std::vector<Entry>& expired, Timestamp now);
 
   /// 插入timer
   bool insert(Timer* timer);
 
+  /// 要执行的loop
   EventLoop* loop_;
+  /// timefd
   const int timerfd_;
+  /// 监听timefd的连接
   Channel timerfdChannel_;
   // Timer list sorted by expiration
   TimerList timers_;

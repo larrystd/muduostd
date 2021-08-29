@@ -75,7 +75,7 @@ class Channel : noncopyable
   void disableWriting() { events_ &= ~kWriteEvent; update(); }
   void disableAll() { events_ = kNoneEvent; update(); }
 
-  
+  /// 当前channel是否可写
   bool isWriting() const { return events_ & kWriteEvent; }
   bool isReading() const { return events_ & kReadEvent; }
 
@@ -104,7 +104,9 @@ class Channel : noncopyable
   static const int kReadEvent;
   static const int kWriteEvent;
 
+  // eventloop对象
   EventLoop* loop_;
+  // 文件描述符
   const int  fd_;
 
   int        events_;
@@ -119,6 +121,7 @@ class Channel : noncopyable
   bool tied_;
   bool eventHandling_;
   bool addedToLoop_;
+
   // 回调函数
   ReadEventCallback readCallback_;
   EventCallback writeCallback_;

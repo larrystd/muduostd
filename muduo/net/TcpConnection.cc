@@ -53,9 +53,11 @@ TcpConnection::TcpConnection(EventLoop* loop,
     peerAddr_(peerAddr),
     highWaterMark_(64*1024*1024)
 {
-  /// 在channel中回调函数
+  /// 在channel中设置回调函数
+  /// 可读回调函数
   channel_->setReadCallback(
       std::bind(&TcpConnection::handleRead, this, _1));
+  /// 可写回调
   channel_->setWriteCallback(
       std::bind(&TcpConnection::handleWrite, this));
   channel_->setCloseCallback(
@@ -108,7 +110,7 @@ void TcpConnection::send(const StringPiece& message)
     {
       /// 函数指针, 指向&TcpConnection::sendInLoop;
       void (TcpConnection::*fp)(const StringPiece& message) = &TcpConnection::sendInLoop;
-      /// 保证在创建eventloop的线程中运行
+      /// 在eventloop的线程中运行&TcpConnection::sendInLoop
       loop_->runInLoop(
           std::bind(fp,
                     this,     // FIXME
@@ -173,7 +175,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
       remaining = len - nwrote;
       if (remaining == 0 && writeCompleteCallback_)
       {
-        /// 将writeCompleteCallback_回调函数加入到队列中
+        /// 将writeCompleteCallback_回调函数加入到队列中, 执行之
         loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
       }
     }
@@ -300,6 +302,7 @@ void TcpConnection::startRead()
 void TcpConnection::startReadInLoop()
 {
   loop_->assertInLoopThread();
+  /// 设置channel可读
   if (!reading_ || !channel_->isReading())
   {
     channel_->enableReading();
@@ -322,7 +325,8 @@ void TcpConnection::stopReadInLoop()
   }
 }
 
-// 连接建立函数, 主要是注册channel
+/// 连接建立函数, 
+/// 注册TcpConnection的channel到loop poller的epoll
 void TcpConnection::connectEstablished()
 {
   loop_->assertInLoopThread();
@@ -332,7 +336,7 @@ void TcpConnection::connectEstablished()
   channel_->tie(shared_from_this());
   /// 设置TcpConnection的channel, 向poller注册监听的fd
   channel_->enableReading();
-
+  /// 连接回调函数
   connectionCallback_(shared_from_this());
 }
 
@@ -345,6 +349,7 @@ void TcpConnection::connectDestroyed()
   if (state_ == kConnected)
   {
     setState(kDisconnected);
+    /// 关闭channel
     channel_->disableAll();
 
     connectionCallback_(shared_from_this());
@@ -353,17 +358,19 @@ void TcpConnection::connectDestroyed()
 }
 
 
-/// 实际调用messageCallback_回调函数
+/// handleRead, 实际调用messageCallback_回调函数
 void TcpConnection::handleRead(Timestamp receiveTime)
 {
   loop_->assertInLoopThread();
   int savedErrno = 0;
-  /// 从inputBuffer_中读取
+  /// 一旦可读, inputBuffer_自动读取channel_->fd()的数据
   ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
   if (n > 0)
   {
+    /// 执行回调函数(用户注册)
     messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
   }
+  /// 没有字节说明读完毕
   else if (n == 0)
   {
     handleClose();
@@ -376,11 +383,15 @@ void TcpConnection::handleRead(Timestamp receiveTime)
   }
 }
 
+/// 写回调函数
 void TcpConnection::handleWrite()
 {
   loop_->assertInLoopThread();
+  /// channel可写
   if (channel_->isWriting())
   {
+
+    /// 写socket, 向fd从
     ssize_t n = sockets::write(channel_->fd(),
                                outputBuffer_.peek(),
                                outputBuffer_.readableBytes());
@@ -390,6 +401,8 @@ void TcpConnection::handleWrite()
       if (outputBuffer_.readableBytes() == 0)
       {
         channel_->disableWriting();
+
+        /// 执行写毕回调函数
         if (writeCompleteCallback_)
         {
           loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
@@ -416,6 +429,7 @@ void TcpConnection::handleWrite()
   }
 }
 
+
 void TcpConnection::handleClose()
 {
   loop_->assertInLoopThread();
@@ -423,6 +437,7 @@ void TcpConnection::handleClose()
   assert(state_ == kConnected || state_ == kDisconnecting);
   // we don't close fd, leave it to dtor, so we can find leaks easily.
   setState(kDisconnected);
+  /// 关闭channel通道
   channel_->disableAll();
 
   TcpConnectionPtr guardThis(shared_from_this());

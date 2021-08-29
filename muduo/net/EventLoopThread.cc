@@ -37,7 +37,7 @@ EventLoopThread::~EventLoopThread()
   }
 }
 
-// 开启线程(执行函数)
+// （主线程)开启线程(执行函数)
 EventLoop* EventLoopThread::startLoop()
 {
   assert(!thread_.started());
@@ -63,7 +63,7 @@ EventLoop* EventLoopThread::startLoop()
 // 新线程执行的函数
 void EventLoopThread::threadFunc()
 {
-   /// 在栈上运行的eventloop， 创建eventloop对象
+   /// 在线程栈上运行的eventloop， 创建eventloop对象
   EventLoop loop;
 
   if (callback_)

@@ -64,13 +64,14 @@ typedef std::function<void()> TimerCallback;
 
 /// 连接回调函数
 typedef std::function<void (const TcpConnectionPtr&)> ConnectionCallback;
+/// 关闭回调函数
 typedef std::function<void (const TcpConnectionPtr&)> CloseCallback;
 /// 写毕回调函数
 typedef std::function<void (const TcpConnectionPtr&)> WriteCompleteCallback;
 typedef std::function<void (const TcpConnectionPtr&, size_t)> HighWaterMarkCallback;
 
 // the data has been read to (buf, len)
-/// 信息到达
+/// 信息到达, 从buffer中获取到达的信息
 typedef std::function<void (const TcpConnectionPtr&,
                             Buffer*,
                             Timestamp)> MessageCallback;

@@ -18,7 +18,7 @@
 #include <memory>
 #include <vector>
 
-// 
+// 线程池对象， 维护一个thread 列表和eventloop* 对象列表
 namespace muduo
 {
 

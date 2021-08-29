@@ -57,6 +57,7 @@ void Channel::update()
   addedToLoop_ = true;
   loop_->updateChannel(this);
 }
+
 /// 向poll关闭某个event
 void Channel::remove()
 {

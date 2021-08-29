@@ -44,11 +44,14 @@ class EPollPoller : public Poller
                           ChannelList* activeChannels) const;
   // update channel
   void update(int operation, Channel* channel);
-  /// event 列表, event是一个poll_event 结构体
+  /// event 列表, event是一个epoll_event 结构体
+  /// epoll_event储存events和data, 存储一个监听的时间
+  /// events 是 epoll 注册的事件，比如EPOLLIN、EPOLLOUT等等
+  /// data 是一个联合体,用来传递参数
   typedef std::vector<struct epoll_event> EventList;
   /// epoll文件描述符
   int epollfd_;
-  /// EventList
+  /// events_是一个epoll_event结构体的vector
   EventList events_;
 };
 
