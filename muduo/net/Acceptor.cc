@@ -53,8 +53,12 @@ void Acceptor::listen()
 {
   loop_->assertInLoopThread();
   listening_ = true;
+
+  /// listen函数使用主动连接套接口变为被连接套接口，使得一个进程可以接受其它进程的请求，从而成为一个服务器进程。
+  /// listen把连接放到一个队列中, 当服务器端accept了，就从listen的队列中取出一个连接
   acceptSocket_.listen();
   // 设置acceptChannel_监听连接通道可读, 注册到loop的poller对象里
+  // listen相当于epoll_wait系统调用, 当有链接服务器执行回调, 没有则等待。服务器是消费者而listen可以视为生产者。
   acceptChannel_.enableReading(); 
 }
 

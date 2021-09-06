@@ -37,6 +37,9 @@ TcpServer::TcpServer(EventLoop* loop,
     nextConnId_(1)
 {
   /// 设置acceptor对象的NewConnectionCallback为&TcpServer::newConnection
+
+  /// 新连接一旦到达, 自动回调TcpServer::newConnection封装为connection, 
+  /// 将该channel fd绑定到执行线程, 负责处理该连接。
   acceptor_->setNewConnectionCallback(
       std::bind(&TcpServer::newConnection, this, _1, _2));
 }

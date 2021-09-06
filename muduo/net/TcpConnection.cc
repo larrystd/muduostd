@@ -164,7 +164,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
     return;
   }
   // if no thing in output queue, try writing directly
-  /// 没有正在写channel_, 且没有要读的字节
+  /// 没有正在写channel_ channal可写, 且没有要读的字节
   if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0)
   {
     /// 向sockets中channel_->fd()写data数据
@@ -363,6 +363,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
 {
   loop_->assertInLoopThread();
   int savedErrno = 0;
+
   /// 一旦可读, inputBuffer_自动读取channel_->fd()的数据
   ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
   if (n > 0)
