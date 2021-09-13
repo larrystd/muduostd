@@ -165,6 +165,7 @@ class Buffer : public muduo::copyable
 
   string retrieveAllAsString()
   {
+
     return retrieveAsString(readableBytes());
   }
 
@@ -172,6 +173,8 @@ class Buffer : public muduo::copyable
   {
     assert(len <= readableBytes());
     string result(peek(), len);
+
+    // 写入缓冲区
     retrieve(len);
     return result;
   }

@@ -1,0 +1,1 @@
+/usr/bin/c++   -O0 -Wall -g2 -ggdb  -rdynamic CMakeFiles/httpserver_test.dir/tests/HttpServer_test.cc.o  -o bin/httpserver_test   -L/home/larry/myproject/myc++proj/muduostd/build1/lib  -Wl,-rpath,/home/larry/myproject/myc++proj/muduostd/build1/lib lib/libmuduo_http.a -lmuduo_net -lmuduo_base -lpthread 

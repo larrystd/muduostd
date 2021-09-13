@@ -1,0 +1,132 @@
+// Copyright 2010, Shuo Chen.  All rights reserved.
+// http://code.google.com/p/muduo/
+//
+// Use of this source code is governed by a BSD-style license
+// that can be found in the License file.
+
+// Author: Shuo Chen (chenshuo at chenshuo dot com)
+//
+
+#include "muduo/net/Buffer.h"
+#include "muduo/net/http/HttpContext.h"
+
+using namespace muduo;
+using namespace muduo::net;
+
+/// 从buf解析请求
+bool HttpContext::processRequestLine(const char* begin, const char* end)
+{
+  bool succeed = false;
+  const char* start = begin;
+  const char* space = std::find(start, end, ' ');
+  /// 可以解析出Method
+  if (space != end && request_.setMethod(start, space))
+  {
+    start = space+1;
+    space = std::find(start, end, ' ');
+    if (space != end)
+    {
+      const char* question = std::find(start, space, '?');
+      if (question != space)
+      {
+        request_.setPath(start, question);
+        request_.setQuery(question, space);
+      }
+      else
+      {
+        request_.setPath(start, space);
+      }
+      start = space+1;
+      succeed = end-start == 8 && std::equal(start, end-1, "HTTP/1.");
+      if (succeed)
+      {
+        if (*(end-1) == '1')
+        {
+          request_.setVersion(HttpRequest::kHttp11);
+        }
+        else if (*(end-1) == '0')
+        {
+          request_.setVersion(HttpRequest::kHttp10);
+        }
+        else
+        {
+          succeed = false;
+        }
+      }
+    }
+  }
+  return succeed;
+}
+
+// return false if any error
+bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
+{
+  bool ok = true;
+  bool hasMore = true;
+  /// 一行一行解析
+  /// state_ = muduo::net::HttpContext::kExpectRequestLine
+  while (hasMore)
+  {
+
+    if (state_ == kExpectRequestLine)
+    {
+      /// 找CR LR \r或\n, 得到结束指针
+      const char* crlf = buf->findCRLF();
+      if (crlf)
+      {
+        /// 从buf中找到crlf
+        // buf中存储的字符如"GET / HTTP/1.1\r\nHost: 127.0.0.1:8000\r\nUser-Agent: curl/7.61.0\r\nAccept: 
+        /// 可以解析出method, httpversion
+        ok = processRequestLine(buf->peek(), crlf);
+        if (ok)
+        {
+          request_.setReceiveTime(receiveTime);
+          /// 读后更新buffer索引
+          buf->retrieveUntil(crlf + 2);
+          /// kExpectHeaders
+          state_ = kExpectHeaders;
+        }
+        else
+        {
+          hasMore = false;
+        }
+      }
+      else
+      {
+        hasMore = false;
+      }
+    }
+    else if (state_ == kExpectHeaders)
+    {
+      const char* crlf = buf->findCRLF();
+      if (crlf)
+      {
+        const char* colon = std::find(buf->peek(), crlf, ':');
+        if (colon != crlf)
+        {
+          request_.addHeader(buf->peek(), colon, crlf);
+        }
+        else
+        {
+          /// 空行
+          // empty line, end of header
+          // FIXME:
+          /// 已经gotall
+          state_ = kGotAll;
+          hasMore = false;
+        }
+        buf->retrieveUntil(crlf + 2);
+      }
+      else
+      {
+        hasMore = false;
+      }
+    }
+
+    else if (state_ == kExpectBody)
+    {
+      // FIXME:
+    }
+  }
+  return ok;
+}

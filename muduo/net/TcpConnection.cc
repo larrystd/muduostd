@@ -125,6 +125,7 @@ void TcpConnection::send(Buffer* buf)
 {
   if (state_ == kConnected)
   {
+    /// fd所属线程直接写
     if (loop_->isInLoopThread())
     {
       sendInLoop(buf->peek(), buf->readableBytes());
@@ -134,6 +135,7 @@ void TcpConnection::send(Buffer* buf)
     {
       void (TcpConnection::*fp)(const StringPiece& message) = &TcpConnection::sendInLoop;
       loop_->runInLoop(
+        /// 执行fp函数
           std::bind(fp,
                     this,     // FIXME
                     buf->retrieveAllAsString()));
@@ -167,7 +169,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
   /// 没有正在写channel_ channal可写, 且没有要读的字节
   if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0)
   {
-    /// 向sockets中channel_->fd()写data数据
+    /// 向sockets中channel_->fd()写data数据, 直接写, 写了nwrote字节
     nwrote = sockets::write(channel_->fd(), data, len);
     /// 写成功
     if (nwrote >= 0)
@@ -179,6 +181,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
         loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
       }
     }
+    /// 写失败
     else // nwrote < 0
     {
       nwrote = 0;
@@ -194,7 +197,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
   }
 
   assert(remaining <= len);
-  /// 
+  /// 没写完的先放入outputBuffer_
   if (!faultError && remaining > 0)
   {
     size_t oldLen = outputBuffer_.readableBytes();
@@ -204,6 +207,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
     {
       loop_->queueInLoop(std::bind(highWaterMarkCallback_, shared_from_this(), oldLen + remaining));
     }
+    //// 先放入outputbuffer
     outputBuffer_.append(static_cast<const char*>(data)+nwrote, remaining);
     
     if (!channel_->isWriting())
@@ -368,7 +372,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
   ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
   if (n > 0)
   {
-    /// 执行回调函数(用户注册)
+    /// 执行回调函数(用户注册的数据处理函数)
     messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
   }
   /// 没有字节说明读完毕

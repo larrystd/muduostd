@@ -88,6 +88,7 @@ class TcpConnection : noncopyable,
 
   bool isReading() const { return reading_; }; // NOT thread safe, may race with start/stopReadInLoop
 
+  /// context
   void setContext(const boost::any& context)
   { context_ = context; }
 
@@ -174,6 +175,8 @@ class TcpConnection : noncopyable,
   /// outputBuffer server写, client读
   Buffer inputBuffer_;
   Buffer outputBuffer_; // FIXME: use list<Buffer> as output buffer.
+
+  /// context_
   boost::any context_;
   // FIXME: creationTime_, lastReceiveTime_
   //        bytesReceived_, bytesSent_
