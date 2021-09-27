@@ -102,9 +102,11 @@ class TcpConnection : noncopyable,
   /// 连接回调函数
   void setConnectionCallback(const ConnectionCallback& cb)
   { connectionCallback_ = cb; }
+
   /// 信息回调函数
   void setMessageCallback(const MessageCallback& cb)
   { messageCallback_ = cb; }
+  
   /// 写毕回调函数
   void setWriteCompleteCallback(const WriteCompleteCallback& cb)
   { writeCompleteCallback_ = cb; }

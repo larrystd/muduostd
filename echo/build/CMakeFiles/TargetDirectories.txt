@@ -1,0 +1,3 @@
+/home/larry/myproject/myc++proj/muduostd/echo/build/CMakeFiles/rebuild_cache.dir
+/home/larry/myproject/myc++proj/muduostd/echo/build/CMakeFiles/simple_echo.dir
+/home/larry/myproject/myc++proj/muduostd/echo/build/CMakeFiles/edit_cache.dir

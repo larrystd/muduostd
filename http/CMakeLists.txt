@@ -37,6 +37,7 @@ link_directories(/home/larry/myproject/myc++proj/muduostd/build/lib)
 #link_libraries(pthread)
 
 target_link_libraries(muduo_http muduo_net muduo_base pthread)
+# target_link_libraries不会将静态库合并, 下次还得连接
 #target_link_libraries(muduo_net muduo_base)
 #set(MUDUO_BUILD_EXAMPLES, True)
 

@@ -46,7 +46,7 @@ HttpServer::HttpServer(EventLoop* loop,
 {
   server_.setConnectionCallback(
       std::bind(&HttpServer::onConnection, this, _1));
-    ///封装
+    ///封装到tcp的messageBack
   server_.setMessageCallback(
       std::bind(&HttpServer::onMessage, this, _1, _2, _3));
 }
