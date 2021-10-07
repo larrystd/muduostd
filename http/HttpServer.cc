@@ -7,12 +7,12 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 //
 
-#include "muduo/net/http/HttpServer.h"
+#include "http/HttpServer.h"
 
 #include "muduo/base/Logging.h"
-#include "muduo/net/http/HttpContext.h"
-#include "muduo/net/http/HttpRequest.h"
-#include "muduo/net/http/HttpResponse.h"
+#include "http/HttpContext.h"
+#include "http/HttpRequest.h"
+#include "http/HttpResponse.h"
 
 using namespace muduo;
 using namespace muduo::net;
@@ -73,10 +73,10 @@ void HttpServer::onMessage(const TcpConnectionPtr& conn,
                            Buffer* buf,
                            Timestamp receiveTime)
 {
-  /// 直接将conn->getMutableContext()转为HttpContext
+  /// 直接将conn->getMutableContext()转为HttpContext类型
   HttpContext* context = boost::any_cast<HttpContext>(conn->getMutableContext());
 
-  /// 解析请求, 不能解析执行400 bad request
+  /// 调用context->parseRequest解析存在Buffer里的请求, 不能解析执行400 bad request
   /// 将请求字符串的信息设置为request的属性
   if (!context->parseRequest(buf, receiveTime))
   {
@@ -84,9 +84,10 @@ void HttpServer::onMessage(const TcpConnectionPtr& conn,
     conn->shutdown();
   }
 
-  /// 解析完毕， 调用onRequest
+  /// 调用context->gotAll()解析完毕， 调用onRequest
   if (context->gotAll())
   {
+    /// 调用onRequest
     onRequest(conn, context->request());
     context->reset();
   }
@@ -100,11 +101,13 @@ void HttpServer::onRequest(const TcpConnectionPtr& conn, const HttpRequest& req)
     (req.getVersion() == HttpRequest::kHttp10 && connection != "Keep-Alive");
 
   HttpResponse response(close);
-  /// 执行用户回调函数
+
+  /// 执行用户自定义回调函数
   httpCallback_(req, &response);
   
   Buffer buf;
   /// 状态码, contentType, header, body等由用户设置
+  /// 将response对象序列化
   response.appendToBuffer(&buf);
   /*response 格式
   {<muduo::copyable> = {<No data fields>}, headers_ = std::map with 2 elements = {["Content-Type"] = "text/html",

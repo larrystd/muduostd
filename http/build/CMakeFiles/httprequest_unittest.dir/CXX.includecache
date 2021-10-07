@@ -6,9 +6,29 @@
 
 #IncludeRegexTransform: 
 
+/home/larry/myproject/myc++proj/muduostd/http/HttpContext.h
+muduo/base/copyable.h
+/home/larry/myproject/myc++proj/muduostd/http/muduo/base/copyable.h
+http/HttpRequest.h
+/home/larry/myproject/myc++proj/muduostd/http/http/HttpRequest.h
+
+/home/larry/myproject/myc++proj/muduostd/http/HttpRequest.h
+muduo/base/copyable.h
+/home/larry/myproject/myc++proj/muduostd/http/muduo/base/copyable.h
+muduo/base/Timestamp.h
+/home/larry/myproject/myc++proj/muduostd/http/muduo/base/Timestamp.h
+muduo/base/Types.h
+/home/larry/myproject/myc++proj/muduostd/http/muduo/base/Types.h
+map
+-
+assert.h
+-
+stdio.h
+-
+
 /home/larry/myproject/myc++proj/muduostd/http/tests/HttpRequest_unittest.cc
-muduo/net/http/HttpContext.h
-/home/larry/myproject/myc++proj/muduostd/http/tests/muduo/net/http/HttpContext.h
+http/HttpContext.h
+/home/larry/myproject/myc++proj/muduostd/http/tests/http/HttpContext.h
 muduo/net/Buffer.h
 /home/larry/myproject/myc++proj/muduostd/http/tests/muduo/net/Buffer.h
 boost/test/unit_test.hpp
@@ -64,25 +84,5 @@ string.h
 stdint.h
 -
 endian.h
--
-
-/home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpContext.h
-muduo/base/copyable.h
-/home/larry/myproject/myc++proj/muduostd/muduo/net/http/muduo/base/copyable.h
-muduo/net/http/HttpRequest.h
-/home/larry/myproject/myc++proj/muduostd/muduo/net/http/muduo/net/http/HttpRequest.h
-
-/home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpRequest.h
-muduo/base/copyable.h
-/home/larry/myproject/myc++proj/muduostd/muduo/net/http/muduo/base/copyable.h
-muduo/base/Timestamp.h
-/home/larry/myproject/myc++proj/muduostd/muduo/net/http/muduo/base/Timestamp.h
-muduo/base/Types.h
-/home/larry/myproject/myc++proj/muduostd/muduo/net/http/muduo/base/Types.h
-map
--
-assert.h
--
-stdio.h
 -
 

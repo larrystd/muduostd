@@ -135,13 +135,14 @@ class HttpRequest : public muduo::copyable
 
   void addHeader(const char* start, const char* colon, const char* end)
   {
-    string field(start, colon);
+    string field(start, colon); // 字段名
     ++colon;
-    while (colon < end && isspace(*colon))
+    while (colon < end && isspace(*colon))  /// 去掉空格
     {
       ++colon;
     }
     string value(colon, end);
+    /// 去掉尾部空格
     while (!value.empty() && isspace(value[value.size()-1]))
     {
       value.resize(value.size()-1);
@@ -163,6 +164,7 @@ class HttpRequest : public muduo::copyable
   const std::map<string, string>& headers() const
   { return headers_; }
 
+  /// swap函数
   void swap(HttpRequest& that)
   {
     std::swap(method_, that.method_);

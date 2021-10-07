@@ -8,7 +8,7 @@
 //
 
 #include "muduo/net/Buffer.h"
-#include "muduo/net/http/HttpContext.h"
+#include "http/HttpContext.h"
 
 using namespace muduo;
 using namespace muduo::net;
@@ -24,6 +24,8 @@ bool HttpContext::processRequestLine(const char* begin, const char* end)
   {
     start = space+1;
     space = std::find(start, end, ' ');
+
+    /// 解析出path
     if (space != end)
     {
       const char* question = std::find(start, space, '?');
@@ -37,6 +39,8 @@ bool HttpContext::processRequestLine(const char* begin, const char* end)
         request_.setPath(start, space);
       }
       start = space+1;
+
+      /// 解析http版本
       succeed = end-start == 8 && std::equal(start, end-1, "HTTP/1.");
       if (succeed)
       {
@@ -59,6 +63,11 @@ bool HttpContext::processRequestLine(const char* begin, const char* end)
 }
 
 // return false if any error
+/// 解析http请求
+/*
+请求行, 请求头部, 请求报文
+GET /favicon.ico HTTP/1.1\r\nHost: 172.20.109.213:9006\r\nConnection: keep-alive\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36\r\nAccept: image/avif,image/webp,image/apng,image/svg+xml,image/*
+*/
 bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
 {
   bool ok = true;
@@ -67,7 +76,7 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
   /// state_ = muduo::net::HttpContext::kExpectRequestLine
   while (hasMore)
   {
-
+    /// 解析请求行
     if (state_ == kExpectRequestLine)
     {
       /// 找CR LR \r或\n, 得到结束指针
@@ -96,13 +105,15 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
         hasMore = false;
       }
     }
+    /// 该解析请求头了
     else if (state_ == kExpectHeaders)
     {
       const char* crlf = buf->findCRLF();
       if (crlf)
       {
+        /// 在buf->peek()到crlf寻找:, peek是可读buf地址
         const char* colon = std::find(buf->peek(), crlf, ':');
-        if (colon != crlf)
+        if (colon != crlf)  // 如果可以找到
         {
           request_.addHeader(buf->peek(), colon, crlf);
         }
@@ -111,7 +122,7 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
           /// 空行
           // empty line, end of header
           // FIXME:
-          /// 已经gotall
+          /// 已经gotall， 设置状态
           state_ = kGotAll;
           hasMore = false;
         }

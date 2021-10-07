@@ -28,6 +28,7 @@ class HttpResponse;
 class HttpServer : noncopyable
 {
  public:
+ /// httpCallback, 设置回调函数用, 传入HttpRequest&, HttpResponse*。前者不可修改, 后者可修改
   typedef std::function<void (const HttpRequest&,
                               HttpResponse*)> HttpCallback;
 
@@ -40,6 +41,7 @@ class HttpServer : noncopyable
   EventLoop* getLoop() const { return server_.getLoop(); }
 
   /// Not thread safe, callback be registered before calling start().
+  /// http回调函数
   void setHttpCallback(const HttpCallback& cb)
   {
     httpCallback_ = cb;

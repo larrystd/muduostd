@@ -3,24 +3,28 @@
 
 CMakeFiles/muduo_http.dir/HttpContext.cc.o
  /home/larry/myproject/myc++proj/muduostd/http/HttpContext.cc
+ /home/larry/myproject/myc++proj/muduostd/http/HttpContext.h
+ /home/larry/myproject/myc++proj/muduostd/http/HttpRequest.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/StringPiece.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/Timestamp.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/Types.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/copyable.h
  /home/larry/myproject/myc++proj/muduostd/muduo/net/Buffer.h
  /home/larry/myproject/myc++proj/muduostd/muduo/net/Endian.h
- /home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpContext.h
- /home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpRequest.h
 CMakeFiles/muduo_http.dir/HttpResponse.cc.o
  /home/larry/myproject/myc++proj/muduostd/http/HttpResponse.cc
+ /home/larry/myproject/myc++proj/muduostd/http/HttpResponse.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/StringPiece.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/Types.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/copyable.h
  /home/larry/myproject/myc++proj/muduostd/muduo/net/Buffer.h
  /home/larry/myproject/myc++proj/muduostd/muduo/net/Endian.h
- /home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpResponse.h
 CMakeFiles/muduo_http.dir/HttpServer.cc.o
+ /home/larry/myproject/myc++proj/muduostd/http/HttpContext.h
+ /home/larry/myproject/myc++proj/muduostd/http/HttpRequest.h
+ /home/larry/myproject/myc++proj/muduostd/http/HttpResponse.h
  /home/larry/myproject/myc++proj/muduostd/http/HttpServer.cc
+ /home/larry/myproject/myc++proj/muduostd/http/HttpServer.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/Atomic.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/LogStream.h
  /home/larry/myproject/myc++proj/muduostd/muduo/base/Logging.h
@@ -35,7 +39,3 @@ CMakeFiles/muduo_http.dir/HttpServer.cc.o
  /home/larry/myproject/myc++proj/muduostd/muduo/net/InetAddress.h
  /home/larry/myproject/myc++proj/muduostd/muduo/net/TcpConnection.h
  /home/larry/myproject/myc++proj/muduostd/muduo/net/TcpServer.h
- /home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpContext.h
- /home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpRequest.h
- /home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpResponse.h
- /home/larry/myproject/myc++proj/muduostd/muduo/net/http/HttpServer.h

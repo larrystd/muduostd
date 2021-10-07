@@ -372,7 +372,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
   ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
   if (n > 0)
   {
-    /// 执行回调函数(用户注册的数据处理函数)
+    /// 数据读取到inputbuffer中之后, 再自动执行回调函数(用户注册的数据处理函数)
     messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
   }
   /// 没有字节说明读完毕

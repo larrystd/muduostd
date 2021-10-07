@@ -7,7 +7,7 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 //
 
-#include "muduo/net/http/HttpResponse.h"
+#include "http/HttpResponse.h"
 #include "muduo/net/Buffer.h"
 
 #include <stdio.h>
@@ -15,7 +15,7 @@
 using namespace muduo;
 using namespace muduo::net;
 
-/// 将要回复的状态码等信息放置到output buffer中
+/// 将要回复的状态码等信息放置到output buffer中, 也就是Reponse对象序列化到Buffer中
 void HttpResponse::appendToBuffer(Buffer* output) const
 {
   char buf[32];
@@ -35,6 +35,7 @@ void HttpResponse::appendToBuffer(Buffer* output) const
     output->append("Connection: Keep-Alive\r\n");
   }
 
+  /// 响应头部
   for (const auto& header : headers_)
   {
     output->append(header.first);
@@ -44,5 +45,6 @@ void HttpResponse::appendToBuffer(Buffer* output) const
   }
 
   output->append("\r\n");
+  /// 设置Body
   output->append(body_);
 }
