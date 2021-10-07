@@ -6,6 +6,12 @@
 
 #IncludeRegexTransform: 
 
+/home/larry/myproject/myc++proj/muduostd/http/HttpContext.cc
+muduo/net/Buffer.h
+/home/larry/myproject/myc++proj/muduostd/http/muduo/net/Buffer.h
+http/HttpContext.h
+/home/larry/myproject/myc++proj/muduostd/http/http/HttpContext.h
+
 /home/larry/myproject/myc++proj/muduostd/http/HttpContext.h
 muduo/base/copyable.h
 /home/larry/myproject/myc++proj/muduostd/http/muduo/base/copyable.h
@@ -23,6 +29,14 @@ map
 -
 assert.h
 -
+stdio.h
+-
+
+/home/larry/myproject/myc++proj/muduostd/http/HttpResponse.cc
+http/HttpResponse.h
+/home/larry/myproject/myc++proj/muduostd/http/http/HttpResponse.h
+muduo/net/Buffer.h
+/home/larry/myproject/myc++proj/muduostd/http/muduo/net/Buffer.h
 stdio.h
 -
 

@@ -13,7 +13,8 @@ using namespace muduo;
 using namespace muduo::net;
 
 bool benchmark = false;
-string staticFilePath = "/home/larry/myproject/myc++proj/muduostd/http/static"; 
+//string staticFilePath = "/home/larry/myproject/myc++proj/muduostd/http/static"; 
+string staticFilePath = "/home/larry/myproject/myc++proj/muduostd/http/daohang";
 
 string readFileContent(string file)
 {
@@ -32,7 +33,6 @@ string readFileContent(string file)
     return content;
 }
 
-
 // 实际的请求处理
 void onRequest(const HttpRequest& req, HttpResponse* resp)
 {
@@ -50,6 +50,7 @@ void onRequest(const HttpRequest& req, HttpResponse* resp)
 
   /// 根据解析的req.path
   string resPath = staticFilePath + req.path();
+  
   if (req.path() == "/")
   {
     resPath += "index.html";
@@ -64,8 +65,9 @@ void onRequest(const HttpRequest& req, HttpResponse* resp)
   }
   else
   {
-      string image = "images";
+      string image = "img";
       /// 返回字符串str中第一次出现子串substr的地址
+      /// 找图片, 可能会有多次请求
       if(strstr(resPath.c_str(),image.c_str()))
       {
         /// 打开文件
