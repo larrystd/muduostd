@@ -14,7 +14,7 @@ using namespace muduo::net;
 
 bool benchmark = false;
 //string staticFilePath = "/home/larry/myproject/myc++proj/muduostd/http/static"; 
-string staticFilePath = "/home/larry/myproject/myc++proj/muduostd/http/daohang";
+string staticFilePath = "../../daohang";
 
 string readFileContent(string file)
 {
@@ -50,7 +50,7 @@ void onRequest(const HttpRequest& req, HttpResponse* resp)
 
   /// 根据解析的req.path
   string resPath = staticFilePath + req.path();
-  
+
   if (req.path() == "/")
   {
     resPath += "index.html";
@@ -88,7 +88,7 @@ void onRequest(const HttpRequest& req, HttpResponse* resp)
           resp->addHeader("Server", "Jackster");
           /// 设置buf的string为返回对象
           resp->setBody(string(buf, sizeof buf));
-      }
+        }
       }
       else
       {
