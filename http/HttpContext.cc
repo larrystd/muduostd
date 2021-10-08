@@ -9,7 +9,7 @@
 
 #include "muduo/net/Buffer.h"
 #include "http/HttpContext.h"
-
+#include <assert.h>
 using namespace muduo;
 using namespace muduo::net;
 
@@ -79,7 +79,7 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
     /// 解析请求行
     if (state_ == kExpectRequestLine)
     {
-      /// 找CR LR \r或\n, 得到结束指针
+      /// 找CR LR \r\n, 也就是请求行结束的位置
       const char* crlf = buf->findCRLF();
       if (crlf)
       {
@@ -90,7 +90,7 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
         if (ok)
         {
           request_.setReceiveTime(receiveTime);
-          /// 读后更新buffer索引
+          /// 读后更新buffer索引, 也就是更新buf->peek()可读位置
           buf->retrieveUntil(crlf + 2);
           /// kExpectHeaders
           state_ = kExpectHeaders;
@@ -108,6 +108,7 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
     /// 该解析请求头了
     else if (state_ == kExpectHeaders)
     {
+      /// 请求头结束的地方
       const char* crlf = buf->findCRLF();
       if (crlf)
       {
@@ -119,14 +120,13 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
         }
         else
         {
-          /// 空行
+          /// 这一行说明该到Body了
           // empty line, end of header
-          // FIXME:
-          /// 已经gotall， 设置状态
-          state_ = kGotAll;
-          hasMore = false;
+          state_ = kExpectBody;
+          
         }
-        buf->retrieveUntil(crlf + 2);
+        /// crlf + 位置已经读完
+        buf->retrieveUntil(crlf + 2); /// 跳过\r\n
       }
       else
       {
@@ -136,7 +136,14 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
 
     else if (state_ == kExpectBody)
     {
-      // FIXME:
+      /// 这个直接让用户解析, 把Body给用户
+      //if (buf->peek() != buf->beginWrite())
+
+      if (buf->readableBytes() > 0 ) /// 还没有读完
+        request_.setBody(buf->peek(), buf->beginWrite());
+
+      state_ = kGotAll; /// 已经读完
+      hasMore = false;
     }
   }
   return ok;

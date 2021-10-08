@@ -50,8 +50,8 @@ option(MUDUO_BUILD_EXAMPLES "Build Muduo examples" ON)
 option(BOOSTTEST_LIBRARY "Build Muduo test examples" ON)
 
 if(MUDUO_BUILD_EXAMPLES)
-add_executable(httpserver_test tests/HttpServer_test.cc)
-target_link_libraries(httpserver_test muduo_http)
+add_executable(httpserver_login tests/HttpServer_login.cc)
+target_link_libraries(httpserver_login muduo_http mysqlclient)
 
 #if(BOOSTTEST_LIBRARY)
 #add_executable(httprequest_unittest tests/HttpRequest_unittest.cc)
@@ -59,9 +59,3 @@ target_link_libraries(httpserver_test muduo_http)
 #endif()
 
 endif()
-
-if(BOOSTTEST_LIBRARY)
-add_executable(httprequest_unittest tests/HttpRequest_unittest.cc)
-target_link_libraries(httprequest_unittest muduo_http boost_unit_test_framework)
-endif()
-# add_subdirectory(tests)

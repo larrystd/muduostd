@@ -130,6 +130,10 @@ class HttpRequest : public muduo::copyable
   void setReceiveTime(Timestamp t)
   { receiveTime_ = t; }
 
+  void setBody(const char* begin, const char* end) {
+    body_ = string(begin, end);
+  }
+
   Timestamp receiveTime() const
   { return receiveTime_; }
 
@@ -175,11 +179,14 @@ class HttpRequest : public muduo::copyable
     headers_.swap(that.headers_);
   }
 
+  string body_; /// http请求 body的内容, 用户自己解析吧
  private:
-  Method method_;
-  Version version_;
-  string path_;
+  /// 属性
+  Method method_; /// 请求方法 get/post
+  Version version_; /// http版本
+  string path_; /// 路径
   string query_;
+
   Timestamp receiveTime_;
   std::map<string, string> headers_;
 };

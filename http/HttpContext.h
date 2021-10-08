@@ -25,6 +25,7 @@ class Buffer;
 class HttpContext : public muduo::copyable
 {
  public:
+ /// http 请求的解析状态
   enum HttpRequestParseState
   {
     kExpectRequestLine,

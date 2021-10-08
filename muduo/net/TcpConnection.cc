@@ -368,7 +368,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
   loop_->assertInLoopThread();
   int savedErrno = 0;
 
-  /// 一旦可读, inputBuffer_自动读取channel_->fd()的数据
+  /// 一旦可读, inputBuffer_自动读取channel_->fd()的数据。放入inputBuffer_的writable中了
   ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
   if (n > 0)
   {

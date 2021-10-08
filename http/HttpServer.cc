@@ -80,6 +80,7 @@ void HttpServer::onMessage(const TcpConnectionPtr& conn,
   /// 将请求字符串的信息设置为request的属性
   if (!context->parseRequest(buf, receiveTime))
   {
+    /// 直接发送400
     conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
     conn->shutdown();
   }

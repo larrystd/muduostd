@@ -49,6 +49,7 @@ class Buffer : public muduo::copyable
   // 显示初始化
   explicit Buffer(size_t initialSize = kInitialSize)
     : buffer_(kCheapPrepend + initialSize),
+    /// 开始readIndex_和writerIndex_都在初始, 被写入后writerIndex后增长, 读取后readIndex_增长
       readerIndex_(kCheapPrepend),
       writerIndex_(kCheapPrepend)
   {
@@ -75,13 +76,15 @@ class Buffer : public muduo::copyable
   // 前空间字节数
   size_t prependableBytes() const
   { return readerIndex_; }
-  // peek() 可读pos地址
+
+
+  // peek() readerIndex_所处的地址
   const char* peek() const
   { return begin() + readerIndex_; }
 
   
-  // 找CR LR \r或\n
-  // 在可读区域寻找
+  // 找CR LR \r\n
+  // 在可读区域寻找 \r\n
   const char* findCRLF() const
   {
     const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF+2);
@@ -92,6 +95,7 @@ class Buffer : public muduo::copyable
   {
     assert(peek() <= start);
     assert(start <= beginWrite());
+    /// std::search 序列[first1，last1)中搜索由[first2，last2)定义的子序列的第一个匹配项
     const char* crlf = std::search(start, beginWrite(), kCRLF, kCRLF+2);
     return crlf == beginWrite() ? NULL : crlf;
   }
@@ -111,9 +115,10 @@ class Buffer : public muduo::copyable
     return static_cast<const char*>(eol);
   }
 
-  // retrieve 读后数据更新索引
+  // retrieve 读后数据更新索引, 长度为len, 表示已经读了len长度
   // 调用retrieveAll， 用kCheapPrepend重新设置readerIndex_和writerIndex_
   // 读后若len < readableBytes(), 后移动readerIndex_
+
   //  若len = readableBytes， 说明缓冲区数据全部读完，重置索引为初值
   void retrieve(size_t len)
   {
@@ -123,7 +128,7 @@ class Buffer : public muduo::copyable
     {
       readerIndex_ += len;
     }
-    // 重置readerIndex_
+    // 如果len == readableBytes(), 表示当前readerIndex已经完全读完, 因此重置readerIndex_
     else
     {
       retrieveAll();
@@ -174,7 +179,7 @@ class Buffer : public muduo::copyable
     assert(len <= readableBytes());
     string result(peek(), len);
 
-    // 写入缓冲区
+    // 读了一些数据, 需要把readerIndex移动到未读的区域
     retrieve(len);
     return result;
   }
@@ -213,12 +218,13 @@ class Buffer : public muduo::copyable
     }
     assert(writableBytes() >= len);
   }
-  // 开始可写的索引
+  // 开始可写的地址, 也就是writeIndex_
   char* beginWrite()
   { return begin() + writerIndex_; }
 
   const char* beginWrite() const
   { return begin() + writerIndex_; }
+  
   // 更新可写的索引
   void hasWritten(size_t len)
   {

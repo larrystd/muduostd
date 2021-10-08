@@ -66,13 +66,14 @@ class HttpResponse : public muduo::copyable
 
   void appendToBuffer(Buffer* output) const;
 
+  string body_;
  private:
   std::map<string, string> headers_;
   HttpStatusCode statusCode_;
   // FIXME: add http version
   string statusMessage_;
   bool closeConnection_;
-  string body_;
+  
 };
 
 }  // namespace net

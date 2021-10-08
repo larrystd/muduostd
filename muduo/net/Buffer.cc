@@ -23,21 +23,25 @@ const size_t Buffer::kCheapPrepend;
 const size_t Buffer::kInitialSize;
 
 
-/// 读取fd的数据
+/// 读取fd的数据到Buff中
+/// 注意这里是client写inputbuffer, inputbuffer client写, outbuffer ser
 ssize_t Buffer::readFd(int fd, int* savedErrno)
 {
   // saved an ioctl()/FIONREAD call to tell how much to read
   char extrabuf[65536];
   struct iovec vec[2];
   const size_t writable = writableBytes();
-  vec[0].iov_base = begin()+writerIndex_;
-  vec[0].iov_len = writable;
+
+  /// 设置一些读取指针
+  vec[0].iov_base = begin()+writerIndex_; /// 可写地址
+  vec[0].iov_len = writable;  /// 可写空间
   vec[1].iov_base = extrabuf;
   vec[1].iov_len = sizeof extrabuf;
   // when there is enough space in this buffer, don't read into extrabuf.
   // when extrabuf is used, we read 128k-1 bytes at most.
   const int iovcnt = (writable < sizeof extrabuf) ? 2 : 1;
   const ssize_t n = sockets::readv(fd, vec, iovcnt);
+
   if (n < 0)
   {
     *savedErrno = errno;

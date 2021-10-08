@@ -172,10 +172,11 @@ class TcpConnection : noncopyable,
   CloseCallback closeCallback_;
   size_t highWaterMark_;
 
-  /// 缓冲区
+  /// 注意两个缓冲区
   // inputBuffer, client写, server读
   /// outputBuffer server写, client读
   Buffer inputBuffer_;
+
   Buffer outputBuffer_; // FIXME: use list<Buffer> as output buffer.
 
   /// context_

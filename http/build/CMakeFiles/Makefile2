@@ -56,8 +56,7 @@ CMAKE_BINARY_DIR = /home/larry/myproject/myc++proj/muduostd/http/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/httpserver_test.dir/all
-all: CMakeFiles/httprequest_unittest.dir/all
+all: CMakeFiles/httpserver_login.dir/all
 all: CMakeFiles/muduo_http.dir/all
 
 .PHONY : all
@@ -68,65 +67,37 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/httpserver_test.dir/clean
-clean: CMakeFiles/httprequest_unittest.dir/clean
+clean: CMakeFiles/httpserver_login.dir/clean
 clean: CMakeFiles/muduo_http.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/httpserver_test.dir
+# Target rules for target CMakeFiles/httpserver_login.dir
 
 # All Build rule for target.
-CMakeFiles/httpserver_test.dir/all: CMakeFiles/muduo_http.dir/all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_test.dir/build.make CMakeFiles/httpserver_test.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_test.dir/build.make CMakeFiles/httpserver_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles --progress-num=3,4 "Built target httpserver_test"
-.PHONY : CMakeFiles/httpserver_test.dir/all
+CMakeFiles/httpserver_login.dir/all: CMakeFiles/muduo_http.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_login.dir/build.make CMakeFiles/httpserver_login.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_login.dir/build.make CMakeFiles/httpserver_login.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles --progress-num=1,2 "Built target httpserver_login"
+.PHONY : CMakeFiles/httpserver_login.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/httpserver_test.dir/rule: cmake_check_build_system
+CMakeFiles/httpserver_login.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles 6
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/httpserver_test.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/httpserver_login.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles 0
-.PHONY : CMakeFiles/httpserver_test.dir/rule
+.PHONY : CMakeFiles/httpserver_login.dir/rule
 
 # Convenience name for target.
-httpserver_test: CMakeFiles/httpserver_test.dir/rule
+httpserver_login: CMakeFiles/httpserver_login.dir/rule
 
-.PHONY : httpserver_test
-
-# clean rule for target.
-CMakeFiles/httpserver_test.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_test.dir/build.make CMakeFiles/httpserver_test.dir/clean
-.PHONY : CMakeFiles/httpserver_test.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/httprequest_unittest.dir
-
-# All Build rule for target.
-CMakeFiles/httprequest_unittest.dir/all: CMakeFiles/muduo_http.dir/all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httprequest_unittest.dir/build.make CMakeFiles/httprequest_unittest.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httprequest_unittest.dir/build.make CMakeFiles/httprequest_unittest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles --progress-num=1,2 "Built target httprequest_unittest"
-.PHONY : CMakeFiles/httprequest_unittest.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/httprequest_unittest.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles 6
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/httprequest_unittest.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles 0
-.PHONY : CMakeFiles/httprequest_unittest.dir/rule
-
-# Convenience name for target.
-httprequest_unittest: CMakeFiles/httprequest_unittest.dir/rule
-
-.PHONY : httprequest_unittest
+.PHONY : httpserver_login
 
 # clean rule for target.
-CMakeFiles/httprequest_unittest.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httprequest_unittest.dir/build.make CMakeFiles/httprequest_unittest.dir/clean
-.PHONY : CMakeFiles/httprequest_unittest.dir/clean
+CMakeFiles/httpserver_login.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_login.dir/build.make CMakeFiles/httpserver_login.dir/clean
+.PHONY : CMakeFiles/httpserver_login.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/muduo_http.dir
@@ -135,7 +106,7 @@ CMakeFiles/httprequest_unittest.dir/clean:
 CMakeFiles/muduo_http.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/muduo_http.dir/build.make CMakeFiles/muduo_http.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/muduo_http.dir/build.make CMakeFiles/muduo_http.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles --progress-num=5,6,7,8 "Built target muduo_http"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/larry/myproject/myc++proj/muduostd/http/build/CMakeFiles --progress-num=3,4,5,6 "Built target muduo_http"
 .PHONY : CMakeFiles/muduo_http.dir/all
 
 # Build rule for subdir invocation for target.

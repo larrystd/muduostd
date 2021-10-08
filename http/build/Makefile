@@ -59,18 +59,6 @@ CMAKE_BINARY_DIR = /home/larry/myproject/myc++proj/muduostd/http/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/local/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/local/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
 # Special rule for the target install/strip
 install/strip: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
@@ -83,15 +71,28 @@ install/strip/fast: preinstall/fast
 	/usr/local/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
 .PHONY : install/strip/fast
 
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/bin/cmake -P cmake_install.cmake
+.PHONY : install
 
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
 
-.PHONY : list_install_components/fast
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/local/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # Special rule for the target install/local
 install/local: preinstall
@@ -116,6 +117,16 @@ test/fast: test
 
 .PHONY : test/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -126,17 +137,6 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
-
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/local/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -171,30 +171,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named httpserver_test
+# Target rules for targets named httpserver_login
 
 # Build rule for target.
-httpserver_test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 httpserver_test
-.PHONY : httpserver_test
+httpserver_login: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 httpserver_login
+.PHONY : httpserver_login
 
 # fast build rule for target.
-httpserver_test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_test.dir/build.make CMakeFiles/httpserver_test.dir/build
-.PHONY : httpserver_test/fast
-
-#=============================================================================
-# Target rules for targets named httprequest_unittest
-
-# Build rule for target.
-httprequest_unittest: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 httprequest_unittest
-.PHONY : httprequest_unittest
-
-# fast build rule for target.
-httprequest_unittest/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httprequest_unittest.dir/build.make CMakeFiles/httprequest_unittest.dir/build
-.PHONY : httprequest_unittest/fast
+httpserver_login/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_login.dir/build.make CMakeFiles/httpserver_login.dir/build
+.PHONY : httpserver_login/fast
 
 #=============================================================================
 # Target rules for targets named muduo_http
@@ -290,59 +277,32 @@ HttpServer.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/muduo_http.dir/build.make CMakeFiles/muduo_http.dir/HttpServer.cc.s
 .PHONY : HttpServer.cc.s
 
-tests/HttpRequest_unittest.o: tests/HttpRequest_unittest.cc.o
+tests/HttpServer_login.o: tests/HttpServer_login.cc.o
 
-.PHONY : tests/HttpRequest_unittest.o
-
-# target to build an object file
-tests/HttpRequest_unittest.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httprequest_unittest.dir/build.make CMakeFiles/httprequest_unittest.dir/tests/HttpRequest_unittest.cc.o
-.PHONY : tests/HttpRequest_unittest.cc.o
-
-tests/HttpRequest_unittest.i: tests/HttpRequest_unittest.cc.i
-
-.PHONY : tests/HttpRequest_unittest.i
-
-# target to preprocess a source file
-tests/HttpRequest_unittest.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httprequest_unittest.dir/build.make CMakeFiles/httprequest_unittest.dir/tests/HttpRequest_unittest.cc.i
-.PHONY : tests/HttpRequest_unittest.cc.i
-
-tests/HttpRequest_unittest.s: tests/HttpRequest_unittest.cc.s
-
-.PHONY : tests/HttpRequest_unittest.s
-
-# target to generate assembly for a file
-tests/HttpRequest_unittest.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httprequest_unittest.dir/build.make CMakeFiles/httprequest_unittest.dir/tests/HttpRequest_unittest.cc.s
-.PHONY : tests/HttpRequest_unittest.cc.s
-
-tests/HttpServer_test.o: tests/HttpServer_test.cc.o
-
-.PHONY : tests/HttpServer_test.o
+.PHONY : tests/HttpServer_login.o
 
 # target to build an object file
-tests/HttpServer_test.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_test.dir/build.make CMakeFiles/httpserver_test.dir/tests/HttpServer_test.cc.o
-.PHONY : tests/HttpServer_test.cc.o
+tests/HttpServer_login.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_login.dir/build.make CMakeFiles/httpserver_login.dir/tests/HttpServer_login.cc.o
+.PHONY : tests/HttpServer_login.cc.o
 
-tests/HttpServer_test.i: tests/HttpServer_test.cc.i
+tests/HttpServer_login.i: tests/HttpServer_login.cc.i
 
-.PHONY : tests/HttpServer_test.i
+.PHONY : tests/HttpServer_login.i
 
 # target to preprocess a source file
-tests/HttpServer_test.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_test.dir/build.make CMakeFiles/httpserver_test.dir/tests/HttpServer_test.cc.i
-.PHONY : tests/HttpServer_test.cc.i
+tests/HttpServer_login.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_login.dir/build.make CMakeFiles/httpserver_login.dir/tests/HttpServer_login.cc.i
+.PHONY : tests/HttpServer_login.cc.i
 
-tests/HttpServer_test.s: tests/HttpServer_test.cc.s
+tests/HttpServer_login.s: tests/HttpServer_login.cc.s
 
-.PHONY : tests/HttpServer_test.s
+.PHONY : tests/HttpServer_login.s
 
 # target to generate assembly for a file
-tests/HttpServer_test.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_test.dir/build.make CMakeFiles/httpserver_test.dir/tests/HttpServer_test.cc.s
-.PHONY : tests/HttpServer_test.cc.s
+tests/HttpServer_login.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/httpserver_login.dir/build.make CMakeFiles/httpserver_login.dir/tests/HttpServer_login.cc.s
+.PHONY : tests/HttpServer_login.cc.s
 
 # Help Target
 help:
@@ -350,16 +310,15 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... install"
 	@echo "... install/strip"
-	@echo "... httpserver_test"
-	@echo "... list_install_components"
-	@echo "... httprequest_unittest"
+	@echo "... install"
+	@echo "... httpserver_login"
+	@echo "... rebuild_cache"
 	@echo "... install/local"
 	@echo "... test"
+	@echo "... list_install_components"
 	@echo "... muduo_http"
 	@echo "... edit_cache"
-	@echo "... rebuild_cache"
 	@echo "... HttpContext.o"
 	@echo "... HttpContext.i"
 	@echo "... HttpContext.s"
@@ -369,12 +328,9 @@ help:
 	@echo "... HttpServer.o"
 	@echo "... HttpServer.i"
 	@echo "... HttpServer.s"
-	@echo "... tests/HttpRequest_unittest.o"
-	@echo "... tests/HttpRequest_unittest.i"
-	@echo "... tests/HttpRequest_unittest.s"
-	@echo "... tests/HttpServer_test.o"
-	@echo "... tests/HttpServer_test.i"
-	@echo "... tests/HttpServer_test.s"
+	@echo "... tests/HttpServer_login.o"
+	@echo "... tests/HttpServer_login.i"
+	@echo "... tests/HttpServer_login.s"
 .PHONY : help
 
 
