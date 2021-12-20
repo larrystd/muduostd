@@ -95,6 +95,7 @@ class Request : public std::enable_shared_from_this<Request>,
   class Curl* owner_;
   CURL* curl_;
   std::shared_ptr<muduo::net::Channel> channel_;
+  // 回调函数
   DataCallback dataCb_;
   DataCallback headerCb_;
   DoneCallback doneCb_;

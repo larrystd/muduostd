@@ -1,6 +1,6 @@
-#include "examples/protobuf/codec/dispatcher.h"
-#include "examples/protobuf/codec/codec.h"
-#include "examples/protobuf/codec/query.pb.h"
+#include "protobuf/codec/dispatcher.h"
+#include "protobuf/codec/codec.h"
+#include "protobuf/codec/query.pb.h"
 
 #include "muduo/base/Logging.h"
 #include "muduo/base/Mutex.h"

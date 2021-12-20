@@ -31,7 +31,7 @@ EventLoopThreadPool::~EventLoopThreadPool()
   // Don't delete loop, it's stack variable
 }
 
-/// 开启线程池
+/// 开启线程池, 线程池中创建线程对象
 void EventLoopThreadPool::start(const ThreadInitCallback& cb)
 {
   assert(!started_);
@@ -46,11 +46,11 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
     char buf[name_.size() + 32];
     snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
 
-    // 构造EventLoopThread对象, 初始化thread对象执行函数
+    // 构造EventLoopThread对象, 初始化一些内容, 但没有执行
     EventLoopThread* t = new EventLoopThread(cb, buf);
     /// threads 列表
     threads_.push_back(std::unique_ptr<EventLoopThread>(t));
-    /// 创建新线程执行startLoop()函数,子线程创建loop对象并执行loop(), 主线程返回子线程的loop对象
+    // 这里才执行了线程, 
     loops_.push_back(t->startLoop());
   }
   /// 不创建新线程， 当前线程执行cb

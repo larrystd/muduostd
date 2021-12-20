@@ -26,7 +26,7 @@ TcpServer::TcpServer(EventLoop* loop,
   : loop_(CHECK_NOTNULL(loop)),
     ipPort_(listenAddr.toIpPort()),
     name_(nameArg),
-    /// 初始化acceptor监听连接,(调用listen(才开始监听)
+    /// 初始化acceptor监听连接, 创建sockfd, bind address
     acceptor_(new Acceptor(loop, listenAddr, option == kReusePort)),
     /// 初始化threadPool
     threadPool_(new EventLoopThreadPool(loop, name_)),

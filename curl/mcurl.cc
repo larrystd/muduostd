@@ -30,19 +30,20 @@ int main(int argc, char* argv[])
   curl::Curl::initialize(curl::Curl::kCURLssl);
   curl::Curl curl(&loop);
 
+/*
   curl::RequestPtr req = curl.getUrl("http://chenshuo.com");
   req->setDataCallback(onData);
   req->setDoneCallback(done);
-
-  curl::RequestPtr req2 = curl.getUrl("https://github.com");
+*/
+  curl::RequestPtr req2 = curl.getUrl("https://baidu.com"); // request对象
   // req2->allowRedirect(5);
   req2->setDataCallback(onData);
-  req2->setDoneCallback(done);
-
+  req2->setDoneCallback(done);  // 完成调用
+/*
   curl::RequestPtr req3 = curl.getUrl("http://example.com");
   // req3->allowRedirect(5);
   req3->setDataCallback(onData);
   req3->setDoneCallback(done2);
-
+*/
   loop.loop();
 }

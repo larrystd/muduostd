@@ -6,10 +6,11 @@
 #include "muduo/net/EventLoop.h"
 #include "muduo/net/InetAddress.h"
 
-#include <utility>
+// #include <utility>
 
 #include <stdio.h>
 #include <unistd.h>
+#include <thread>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -24,40 +25,37 @@ void onConnection(const TcpConnectionPtr& conn)
 
 void onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timestamp)
 {
-  conn->send(buf);
+  conn->send(buf);  // 数据原路返回
 }
 
-int main(int argc, char* argv[])
-{
-  if (argc < 4)
-  {
-    fprintf(stderr, "Usage: server <address> <port> <threads>\n");
+int main(int argc, char* argv[]) {
+  if (argc < 4) {
+    fprintf(stderr, "Usage: server <address> <port> <threads> \n"); // 标准错误流
+    abort();  // 异常退出
   }
-  else
-  {
-    LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
-    Logger::setLogLevel(Logger::WARN);
 
-    const char* ip = argv[1];
-    uint16_t port = static_cast<uint16_t>(atoi(argv[2]));
-    InetAddress listenAddr(ip, port);
-    int threadCount = atoi(argv[3]);
+  //LOG_INFO << "pid = " << getpid() << ", tid = " << std::this_thread::get_id();
+  LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
+  Logger::setLogLevel(Logger::WARN);
+  
+  const char* ip = argv[1];
+  uint16_t port = static_cast<uint16_t>(atoi(argv[2]));
 
-    EventLoop loop;
+  InetAddress listenAddr(ip, port);
+  int threadCount = atoi(argv[3]);
 
-    TcpServer server(&loop, listenAddr, "PingPong");
+  EventLoop loop;
 
-    server.setConnectionCallback(onConnection);
-    server.setMessageCallback(onMessage);
+  TcpServer server (&loop, listenAddr, "PingPong");
+  server.setConnectionCallback(onConnection);
+  server.setMessageCallback(onMessage);
 
-    if (threadCount > 1)
-    {
-      server.setThreadNum(threadCount);
-    }
-
-    server.start();
-
-    loop.loop();
+  if (threadCount > 1) {
+    server.setThreadNum(threadCount);
   }
+
+  server.start(); // 创建sockfd, bind address, listen
+  loop.loop();
+
 }
 

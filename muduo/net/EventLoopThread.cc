@@ -60,7 +60,7 @@ EventLoop* EventLoopThread::startLoop()
   return loop;
 }
 
-// 新线程执行的函数
+// 新线程执行的函数, 创建loop对象, 地址赋给loop_再唤醒主线程
 void EventLoopThread::threadFunc()
 {
    /// 在线程栈上运行的eventloop， 创建eventloop对象
@@ -80,7 +80,6 @@ void EventLoopThread::threadFunc()
   }
   // 线程执行loop循环
   loop.loop();
-  //assert(exiting_);
   MutexLockGuard lock(mutex_);
   loop_ = NULL;
 }

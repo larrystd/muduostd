@@ -1,0 +1,1 @@
+/usr/bin/c++   -O0 -Wall -g2 -ggdb  -rdynamic CMakeFiles/protobuf_dispatcher_test.dir/dispatcher_test.cc.o  -o protobuf_dispatcher_test   -L/home/larry/myproject/myc++proj/muduostd/lib  -L/usr/local/lib  -Wl,-rpath,/home/larry/myproject/myc++proj/muduostd/lib:/usr/local/lib libquery_proto.a -lprotobuf -lmuduo_net -lmuduo_base -lpthread 

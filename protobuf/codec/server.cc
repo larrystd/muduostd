@@ -1,6 +1,6 @@
-#include "examples/protobuf/codec/codec.h"
-#include "examples/protobuf/codec/dispatcher.h"
-#include "examples/protobuf/codec/query.pb.h"
+#include "protobuf/codec/codec.h"
+#include "protobuf/codec/dispatcher.h"
+#include "protobuf/codec/query.pb.h"
 
 #include "muduo/base/Logging.h"
 #include "muduo/base/Mutex.h"
@@ -16,7 +16,7 @@ using namespace muduo::net;
 typedef std::shared_ptr<muduo::Query> QueryPtr;
 typedef std::shared_ptr<muduo::Answer> AnswerPtr;
 
-class QueryServer : noncopyable
+class QueryServer : noncopyable // 这里就是定义+实现
 {
  public:
   QueryServer(EventLoop* loop,
@@ -25,7 +25,7 @@ class QueryServer : noncopyable
     dispatcher_(std::bind(&QueryServer::onUnknownMessage, this, _1, _2, _3)),
     codec_(std::bind(&ProtobufDispatcher::onProtobufMessage, &dispatcher_, _1, _2, _3))
   {
-    dispatcher_.registerMessageCallback<muduo::Query>(
+    dispatcher_.registerMessageCallback<muduo::Query>(  // 注册回调函数
         std::bind(&QueryServer::onQuery, this, _1, _2, _3));
     dispatcher_.registerMessageCallback<muduo::Answer>(
         std::bind(&QueryServer::onAnswer, this, _1, _2, _3));
@@ -80,7 +80,7 @@ class QueryServer : noncopyable
     conn->shutdown();
   }
 
-  TcpServer server_;
+  TcpServer server_;  // server服务
   ProtobufDispatcher dispatcher_;
   ProtobufCodec codec_;
 };
@@ -88,13 +88,13 @@ class QueryServer : noncopyable
 int main(int argc, char* argv[])
 {
   LOG_INFO << "pid = " << getpid();
-  if (argc > 1)
+  if (argc > 1) // 输一个命令行参数, 绑定的端口
   {
     EventLoop loop;
     uint16_t port = static_cast<uint16_t>(atoi(argv[1]));
     InetAddress serverAddr(port);
     QueryServer server(&loop, serverAddr);
-    server.start();
+    server.start(); // 执行服务监听
     loop.loop();
   }
   else

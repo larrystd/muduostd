@@ -62,7 +62,7 @@ class HttpServer : noncopyable
                  Timestamp receiveTime);
   void onRequest(const TcpConnectionPtr&, const HttpRequest&);
 
-  TcpServer server_;
+  TcpServer server_;  // 内部维护了tcpserver对象来处理tcp连接
   HttpCallback httpCallback_;
 };
 

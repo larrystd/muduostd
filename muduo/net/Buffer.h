@@ -115,11 +115,7 @@ class Buffer : public muduo::copyable
     return static_cast<const char*>(eol);
   }
 
-  // retrieve 读后数据更新索引, 长度为len, 表示已经读了len长度
-  // 调用retrieveAll， 用kCheapPrepend重新设置readerIndex_和writerIndex_
-  // 读后若len < readableBytes(), 后移动readerIndex_
-
-  //  若len = readableBytes， 说明缓冲区数据全部读完，重置索引为初值
+  // retrieve read 数据后数据更新buffer的readerIndex_, 长度为len, 表示已经读了len长度
   void retrieve(size_t len)
   {
     assert(len <= readableBytes());
@@ -225,7 +221,7 @@ class Buffer : public muduo::copyable
   const char* beginWrite() const
   { return begin() + writerIndex_; }
   
-  // 更新可写的索引
+  // 更新writerIndex_
   void hasWritten(size_t len)
   {
     assert(len <= writableBytes());

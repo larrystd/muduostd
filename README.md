@@ -1,3 +1,5 @@
-### mymuduo
+### muduo的应用
 
-基于muduo的网络库, 基于muduo实现了网络库以及http静态资源访问。
+主要
+* 重写及学习Muduo网络库
+* 分析Muduo的几个示例应用, 例如memcached, protorpc, pingpong等

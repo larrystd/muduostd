@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+245d5aa2f8c5995e6a4a0d22df262519 CMakeFiles/codec
+e67225a7afb3e7d34e28e50b996ee049 CMakeFiles/protobuf_codec_all

@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+6ed0d985158030357641fbf1741c699e sudoku.pb.cc

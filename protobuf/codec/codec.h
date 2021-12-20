@@ -28,7 +28,7 @@ typedef std::shared_ptr<google::protobuf::Message> MessagePtr;
 //
 // FIXME: merge with RpcCodec
 //
-class ProtobufCodec : muduo::noncopyable
+class ProtobufCodec : muduo::noncopyable  // Codec就是编码和解码
 {
  public:
 

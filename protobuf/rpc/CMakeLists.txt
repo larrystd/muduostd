@@ -1,3 +1,22 @@
+cmake_minimum_required(VERSION 2.6)
+
+project(codec C CXX)
+
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
+set(CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR})
+
+include_directories(/home/larry/myproject/myc++proj/muduostd)
+include_directories(/usr/local/include)
+
+link_directories(/home/larry/myproject/myc++proj/muduostd/lib)
+link_directories(/usr/local/lib)
+
+set(protobuf_codec  muduo_net  muduo_protorpc muduo_protorpc_wire muduo_protobuf_codec   muduo_base libprotobuf.a pthread z)  # z压缩库
+
+
 add_custom_command(OUTPUT sudoku.pb.cc sudoku.pb.h
   COMMAND protoc
   ARGS --cpp_out . ${CMAKE_CURRENT_SOURCE_DIR}/sudoku.proto -I${CMAKE_CURRENT_SOURCE_DIR}
@@ -7,25 +26,12 @@ set_source_files_properties(sudoku.pb.cc PROPERTIES COMPILE_FLAGS "-Wno-conversi
 include_directories(${PROJECT_BINARY_DIR})
 
 add_library(sudoku_proto sudoku.pb.cc)
-target_link_libraries(sudoku_proto protobuf pthread)
+target_link_libraries(sudoku_proto ${protobuf_codec})
 
 add_executable(protobuf_rpc_sudoku_client client.cc)
 set_target_properties(protobuf_rpc_sudoku_client PROPERTIES COMPILE_FLAGS "-Wno-error=shadow")
-target_link_libraries(protobuf_rpc_sudoku_client sudoku_proto muduo_protorpc)
+target_link_libraries(protobuf_rpc_sudoku_client sudoku_proto ${protobuf_codec})
 
 add_executable(protobuf_rpc_sudoku_server server.cc)
 set_target_properties(protobuf_rpc_sudoku_server PROPERTIES COMPILE_FLAGS "-Wno-error=shadow")
-target_link_libraries(protobuf_rpc_sudoku_server sudoku_proto muduo_protorpc)
-
-add_custom_target(protobuf_rpc_all
-                  DEPENDS
-                        muduo_protorpc
-                        protobuf_rpc_balancer
-                        protobuf_rpc_balancer_raw
-                        protobuf_rpc_echo_client
-                        protobuf_rpc_echo_server
-                        protobuf_rpc_resolver_client
-                        protobuf_rpc_resolver_server
-                        protobuf_rpc_sudoku_client
-                        protobuf_rpc_sudoku_server
-                        )
+target_link_libraries(protobuf_rpc_sudoku_server sudoku_proto ${protobuf_codec})

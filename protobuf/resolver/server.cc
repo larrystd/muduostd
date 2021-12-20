@@ -1,9 +1,9 @@
-#include "examples/protobuf/resolver/resolver.pb.h"
+#include "protobuf/resolver/resolver.pb.h"
 
 #include "muduo/base/Logging.h"
 #include "muduo/net/EventLoop.h"
-#include "muduo/net/protorpc/RpcServer.h"
-#include "examples/cdns/Resolver.h"
+#include "protorpc/RpcServer.h"
+#include "cdns/Resolver.h"
 
 #include <unistd.h>
 

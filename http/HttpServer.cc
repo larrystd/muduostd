@@ -35,7 +35,6 @@ void defaultHttpCallback(const HttpRequest&, HttpResponse* resp)
 }  // namespace net
 }  // namespace muduo
 
-/// 构造函数
 /// 设置用户定义的回调函数
 HttpServer::HttpServer(EventLoop* loop,
                        const InetAddress& listenAddr,
@@ -44,6 +43,7 @@ HttpServer::HttpServer(EventLoop* loop,
   : server_(loop, listenAddr, name, option),
     httpCallback_(detail::defaultHttpCallback)
 {
+  // 向tcpserver注册回调函数, 尤其是&HttpServer::onMessage, 进而调用用户的处理逻辑onMessage
   server_.setConnectionCallback(
       std::bind(&HttpServer::onConnection, this, _1));
     ///封装到tcp的messageBack
@@ -56,7 +56,7 @@ void HttpServer::start()
 {
   LOG_WARN << "HttpServer[" << server_.name()
     << "] starts listening on " << server_.ipPort();
-  server_.start();
+  server_.start();  // tcpserver.start
 }
 
 /// 有连接. 调用连接

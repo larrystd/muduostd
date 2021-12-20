@@ -1,0 +1,1 @@
+/usr/bin/c++   -O0 -Wall -g2 -ggdb  -rdynamic CMakeFiles/memcached_bench.dir/bench.cc.o  -o memcached_bench   -L/home/larry/myproject/myc++proj/muduostd/lib  -Wl,-rpath,/home/larry/myproject/myc++proj/muduostd/lib -linspect_source -lmuduo_http -lmuduo_net -lmuduo_base -lpthread -lboost_program_options 

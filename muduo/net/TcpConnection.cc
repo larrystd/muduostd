@@ -340,7 +340,7 @@ void TcpConnection::connectEstablished()
   channel_->tie(shared_from_this());
   /// 设置TcpConnection的channel, 向poller注册监听的fd
   channel_->enableReading();
-  /// 连接回调函数
+  /// 建立连接后, 会调用连接回调函数
   connectionCallback_(shared_from_this());
 }
 
@@ -356,6 +356,7 @@ void TcpConnection::connectDestroyed()
     /// 关闭channel
     channel_->disableAll();
 
+    // 关闭连接时也会调用连接回调函数
     connectionCallback_(shared_from_this());
   }
   channel_->remove();
